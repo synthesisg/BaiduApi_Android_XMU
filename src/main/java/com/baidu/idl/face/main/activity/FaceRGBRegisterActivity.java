@@ -11,15 +11,13 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.baidu.idl.face.main.camera.CameraPreviewManager;
 import com.baidu.idl.face.main.model.GlobalSet;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
+import com.baidu.idl.face.main.model.User;
 import com.baidu.idl.face.main.utils.BitmapUtils;
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.camera.AutoTexturePreviewView;
@@ -31,6 +29,7 @@ import com.baidu.idl.face.main.callback.FaceFeatureCallBack;
 import com.baidu.idl.face.main.model.LivenessModel;
 import com.baidu.idl.face.main.utils.FileUtils;
 import com.baidu.idl.face.main.utils.ImageUtils;
+import com.baidu.idl.face.main.utils.PlatformUtils;
 import com.baidu.idl.face.main.view.CircleImageView;
 import com.baidu.idl.face.main.view.FaceRoundView;
 import com.baidu.idl.facesdkdemo.R;
@@ -409,57 +408,76 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
         if (ret == 128) {
 
             String imageName = groupId + "-" + username + ".jpg";
-            // 注册到人脸库
-            boolean isSuccess = FaceApi.getInstance().registerUserIntoDBmanager(groupId, username, imageName,
-                    userInfo, faceFeature);
-            if (isSuccess) {
-                // 关闭摄像头
-                CameraPreviewManager.getInstance().stopPreview();
-                Log.e("qing", "注册成功");
+            //注册部分
+            if("update_face".equals(getIntent().getStringExtra("page_type"))==false) {
+                // 注册到人脸库
+                boolean isSuccess = FaceApi.getInstance().registerUserIntoDBmanager(groupId, username, imageName,
+                        userInfo, faceFeature);
+                if (isSuccess) {
+                    // 关闭摄像头
+                    CameraPreviewManager.getInstance().stopPreview();
+                    Log.e("qing", "注册成功");
 
-                // 压缩、保存人脸图片至300 * 300
-                File faceDir = FileUtils.getBatchImportSuccessDirectory();
-                File file = new File(faceDir, imageName);
-                ImageUtils.resize(rgbBitmap, file, 300, 300);
+                    // 压缩、保存人脸图片至300 * 300
+                    File faceDir = FileUtils.getBatchImportSuccessDirectory();
+                    File file = new File(faceDir, imageName);
+                    ImageUtils.resize(rgbBitmap, file, 300, 300);
 
-                // 数据变化，更新内存
-                FaceApi.getInstance().initDatabases(true);
+                /*
+                ======================================================================上传服务器================================
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mTrackText.setVisibility(View.VISIBLE);
-                        mTrackText.setText("注册完毕");
-                        mTrackText.setBackgroundColor(Color.rgb(66, 147, 136));
-                        mDetectText.setText("用户" + username + "," + "已经注册完毕");
-                        mDetectImage.setImageBitmap(rgbBitmap);
-                        // 防止重复注册
-                        username = null;
-                        groupId = null;
-                        // 做延时 finish
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                FaceRGBRegisterActivity.this.finish();
-                            }
-                        }, 1000);
 
-                    }
-                });
+                //*/
 
+                    // 数据变化，更新内存
+                    FaceApi.getInstance().initDatabases(true);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTrackText.setVisibility(View.VISIBLE);
+                            mTrackText.setText("注册完毕");
+                            mTrackText.setBackgroundColor(Color.rgb(66, 147, 136));
+                            mDetectText.setText("用户" + username + "," + "已经注册完毕");
+                            mDetectImage.setImageBitmap(rgbBitmap);
+                            // 防止重复注册
+                            username = null;
+                            groupId = null;
+                            // 做延时 finish
+                            new Handler().postDelayed(new Runnable() {
+                                public void run() {
+                                    FaceRGBRegisterActivity.this.finish();
+                                }
+                            }, 1000);
+
+                        }
+                    });
+
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTrackText.setVisibility(View.VISIBLE);
+                            mTrackText.setText("注册失败");
+                            mTrackText.setBackgroundColor(Color.RED);
+                            mDetectText.setText("特征提取成功");
+                        }
+                    });
+                }
             } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mTrackText.setVisibility(View.VISIBLE);
-                        mTrackText.setText("注册失败");
-                        mTrackText.setBackgroundColor(Color.RED);
-                        mDetectText.setText("特征提取成功");
-                    }
-                });
+                //修改部分
+                User update_user= PlatformUtils.getUser();
+                update_user.setFeature(faceFeature);
+                FaceApi.getInstance().userUpdate(update_user);
+            //连接两数据库==========================================================上传服务器===========================================
+                PlatformUtils.setUser(update_user);
+                FaceApi.getInstance().initDatabases(true);
+                Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(FaceRGBRegisterActivity.this, WelcomeActivity.class));
             }
 
         } else if (ret == -1) {
-            displayTip("特征提取失败");
+            displayTip("特征提取失败, ret = -1");
         } else {
 
             runOnUiThread(new Runnable() {

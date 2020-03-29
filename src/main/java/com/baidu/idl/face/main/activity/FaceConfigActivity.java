@@ -3,6 +3,7 @@ package com.baidu.idl.face.main.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -39,6 +40,7 @@ public class FaceConfigActivity extends BaseActivity implements CustomDialog.OnD
             if ("register".equals(pageType)) {
                 titleTv.setText("注册");
             }
+            Log.e("PAGE_TYPE",pageType+"========================================");
         }
 
         mDialog = new CustomDialog(this);

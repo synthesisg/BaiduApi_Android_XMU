@@ -6,6 +6,7 @@ package com.baidu.idl.face.main.api;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
+import android.util.Log;
 import com.baidu.idl.face.main.db.DBManager;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.Group;
@@ -153,9 +154,13 @@ public class FaceApi {
      * 更新用户
      */
     public boolean userUpdate(User user) {
+        Log.e("FaceApi","Begin updateUser , uuid = "+user.getUserId());
         if (user == null) {
             return false;
         }
+        Group group = new Group();
+        group.setGroupId(user.getGroupId());
+        DBManager.getInstance().addGroup(group);
 
         boolean ret = DBManager.getInstance().updateUser(user);
         return ret;

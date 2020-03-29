@@ -17,10 +17,8 @@ import android.widget.TextView;
 
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.manager.UserInfoManager;
-import com.baidu.idl.face.main.utils.BitmapUtils;
-import com.baidu.idl.face.main.utils.FileUtils;
-import com.baidu.idl.face.main.utils.ToastUtils;
-import com.baidu.idl.face.main.utils.Utils;
+import com.baidu.idl.face.main.model.User;
+import com.baidu.idl.face.main.utils.*;
 import com.baidu.idl.facesdkdemo.R;
 
 import java.io.File;
@@ -101,29 +99,38 @@ public class FaceUserInfoActivity extends BaseActivity implements View.OnClickLi
         mListener = new FaceUserInfoListener();
         Intent intent = getIntent();
         if (intent != null) {
-            mGroupId = intent.getStringExtra("group_id");
-            mUserId = intent.getStringExtra("user_id");
-
-            mUserName = intent.getStringExtra("user_name");
-            mTextUserName.setText("用户：" + mUserName);
-            mTextUserInfoName.setText("用户名：" + mUserName);
-
-            String userInfo = intent.getStringExtra("user_info");
-            if (TextUtils.isEmpty(userInfo)) {
-                mTextUserInfo.setVisibility(View.GONE);
-            } else {
-                mTextUserInfo.setVisibility(View.VISIBLE);
-                mTextUserInfo.setText("用户信息：" + userInfo);
+            if (intent.getStringExtra("page_type") != null && "user_info".equals(intent.getStringExtra("page_type"))) {
+                User user= PlatformUtils.getUser();
+                intent.putExtra("group_id",user.getGroupId());
+                intent.putExtra("user_id",user.getUserId());
+                intent.putExtra("user_name",user.getUserName());
+                intent.putExtra("user_info",user.getUserInfo());
+                intent.putExtra("ctime",user.getCtime());
+                intent.putExtra("user_pic",user.getImageName());
             }
+                mGroupId = intent.getStringExtra("group_id");
+                mUserId = intent.getStringExtra("user_id");
 
-            long ctime = intent.getLongExtra("ctime", 0);
-            String ctimeFormat = Utils.formatTime(ctime, "yyyy.MM.dd HH:mm:ss");
-            mTextUserInfoCtime.setText("创建时间：" + ctimeFormat);
+                mUserName = intent.getStringExtra("user_name");
+                mTextUserName.setText("用户：" + mUserName);
+                mTextUserInfoName.setText("用户名：" + mUserName);
 
-            mImageName = intent.getStringExtra("user_pic");
-            Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.getBatchImportSuccessDirectory()
-                    + "/" + mImageName);
-            mImageUserHead.setImageBitmap(bitmap);
+                String userInfo = intent.getStringExtra("user_info");
+                if (TextUtils.isEmpty(userInfo)) {
+                    mTextUserInfo.setVisibility(View.GONE);
+                } else {
+                    mTextUserInfo.setVisibility(View.VISIBLE);
+                    mTextUserInfo.setText("用户信息：" + userInfo);
+                }
+
+                long ctime = intent.getLongExtra("ctime", 0);
+                String ctimeFormat = Utils.formatTime(ctime, "yyyy.MM.dd HH:mm:ss");
+                mTextUserInfoCtime.setText("创建时间：" + ctimeFormat);
+
+                mImageName = intent.getStringExtra("user_pic");
+                Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.getBatchImportSuccessDirectory()
+                        + "/" + mImageName);
+                mImageUserHead.setImageBitmap(bitmap);
         }
     }
 

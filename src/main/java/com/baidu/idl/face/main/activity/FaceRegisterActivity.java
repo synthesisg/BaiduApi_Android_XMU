@@ -1,8 +1,10 @@
 package com.baidu.idl.face.main.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +14,7 @@ import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.model.User;
+import com.baidu.idl.face.main.utils.PlatformUtils;
 import com.baidu.idl.facesdkdemo.R;
 
 import java.util.List;
@@ -31,7 +34,7 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
 
 
     public static final int SOURCE_REG = 1;
-
+    private Context mContext;
     public static final int PICK_REG_VIDEO = 100;
     private EditText usernameEt;
     private EditText userGroupEt;
@@ -49,7 +52,7 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_face_register);
-
+        mContext = this;
         initView();
 
     }
@@ -67,6 +70,20 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
         autoDetectBtn.setOnClickListener(this);
         settingButton.setOnClickListener(this);
         backBtn.setOnClickListener(this);
+
+        if(getIntent().getStringExtra("page_type")==null) return;
+
+        Log.e("update_base_type",getIntent().getStringExtra("page_type"));
+        if("update_base".equals(getIntent().getStringExtra("page_type")))
+        {
+            //填写默认信息
+            usernameEt.setText(PlatformUtils.getUser().getUserName());
+            userGroupEt.setText(PlatformUtils.getUser().getGroupId());
+            userInfoEt.setText(PlatformUtils.getUser().getUserInfo());
+
+            //UI修改
+            autoDetectBtn.setText("保存修改");
+        }
     }
 
 
@@ -79,6 +96,8 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
         if (view == autoDetectBtn) {
 
             final String username = usernameEt.getText().toString().trim();
+            String now_name = null;
+            if(PlatformUtils.getUser()!=null) now_name=PlatformUtils.getUser().getUserName();
             if (TextUtils.isEmpty(username)) {
                 Toast.makeText(FaceRegisterActivity.this, "用户名不能为空", Toast.LENGTH_SHORT).show();
                 return;
@@ -117,7 +136,7 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
             if (listUsers != null && listUsers.size() > 0) {
                 for (User user : listUsers) {
                     String DBUserName = user.getUserName();
-                    if (username.equals(DBUserName)) {
+                    if (username.equals(DBUserName) && (DBUserName.equals(now_name)==false)) {
                         Toast.makeText(FaceRegisterActivity.this, "注册失败，有重名用户！", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -131,69 +150,84 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
                 return;
             }
 
-            //==================================================================================================================
-
-            // 判断活体类型
-            int liveType = SingleBaseConfig.getBaseConfig().getType();
-            if (liveType == 1 || liveType == 2) { // RGB
-                if (liveType == 1) {
-                    Toast.makeText(this, "当前活体策略：无活体", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "当前活体策略：RGB活体", Toast.LENGTH_SHORT).show();
-                }
-                Intent intent = new Intent(FaceRegisterActivity.this, FaceRGBRegisterActivity.class);
-                intent.putExtra("group_id", groupId);
-                intent.putExtra("user_name", username);
-                if (!TextUtils.isEmpty(userInfo)) {
-                    intent.putExtra("user_info", userInfo);
-                }
-                startActivityForResult(intent, PICK_REG_VIDEO);
+            //更新基本数据
+            if(getIntent().getStringExtra("page_type")!=null && "update_base".equals(getIntent().getStringExtra("page_type")))
+            {
+                User update_user=PlatformUtils.getUser();
+                update_user.setUserName(usernameEt.getText().toString().trim());
+                update_user.setGroupId(userGroupEt.getText().toString().trim());
+                update_user.setUserInfo(userInfoEt.getText().toString().trim());
+                boolean succ=FaceApi.getInstance().userUpdate(update_user);//=======debug
+                Log.e("update_base_succ",Boolean.toString(succ));
+                //连接两数据库==========================================================上传服务器===========================================
+                PlatformUtils.setUser(update_user);
+                Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(mContext, WelcomeActivity.class));
                 finish();
-
-            } else if (liveType == 3) { // NIR
-
-                Toast.makeText(this, "当前活体策略：IR活体", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(FaceRegisterActivity.this, FaceIRRegisterActivity.class);
-                intent.putExtra("group_id", groupId);
-                intent.putExtra("user_name", username);
-                if (!TextUtils.isEmpty(userInfo)) {
-                    intent.putExtra("user_info", userInfo);
-                }
-                startActivityForResult(intent, PICK_REG_VIDEO);
-                finish();
-
-            } else if (liveType == 4) { // Depth
-
-                int cameraType = SingleBaseConfig.getBaseConfig().getCameraType();
-                switch (cameraType) {
-                    case 1: {
-                        Intent proIntent = new Intent(FaceRegisterActivity.this, FaceDepthRegisterActivity.class);
-                        proIntent.putExtra("group_id", groupId);
-                        proIntent.putExtra("user_name", username);
-                        if (!TextUtils.isEmpty(userInfo)) {
-                            proIntent.putExtra("user_info", userInfo);
-                        }
-                        startActivityForResult(proIntent, PICK_REG_VIDEO);
-                        finish();
+            }
+            //==================================================人脸注册================================================================
+            else {
+                // 判断活体类型
+                int liveType = SingleBaseConfig.getBaseConfig().getType();
+                if (liveType == 1 || liveType == 2) { // RGB
+                    if (liveType == 1) {
+                        Toast.makeText(this, "当前活体策略：无活体", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "当前活体策略：RGB活体", Toast.LENGTH_SHORT).show();
                     }
-                        break;
-                    case 2: { // atlas
-                        Intent proIntent = new Intent(FaceRegisterActivity.this, FaceDepthRegisterActivity.class);
-                        proIntent.putExtra("group_id", groupId);
-                        proIntent.putExtra("user_name", username);
-                        if (!TextUtils.isEmpty(userInfo)) {
-                            proIntent.putExtra("user_info", userInfo);
-                        }
-                        startActivityForResult(proIntent, PICK_REG_VIDEO);
-                        finish();
-
+                    Intent intent = new Intent(FaceRegisterActivity.this, FaceRGBRegisterActivity.class);
+                    intent.putExtra("group_id", groupId);
+                    intent.putExtra("user_name", username);
+                    if (!TextUtils.isEmpty(userInfo)) {
+                        intent.putExtra("user_info", userInfo);
                     }
+                    startActivityForResult(intent, PICK_REG_VIDEO);
+                    finish();
+
+                } else if (liveType == 3) { // NIR
+
+                    Toast.makeText(this, "当前活体策略：IR活体", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(FaceRegisterActivity.this, FaceIRRegisterActivity.class);
+                    intent.putExtra("group_id", groupId);
+                    intent.putExtra("user_name", username);
+                    if (!TextUtils.isEmpty(userInfo)) {
+                        intent.putExtra("user_info", userInfo);
+                    }
+                    startActivityForResult(intent, PICK_REG_VIDEO);
+                    finish();
+
+                } else if (liveType == 4) { // Depth
+
+                    int cameraType = SingleBaseConfig.getBaseConfig().getCameraType();
+                    switch (cameraType) {
+                        case 1: {
+                            Intent proIntent = new Intent(FaceRegisterActivity.this, FaceDepthRegisterActivity.class);
+                            proIntent.putExtra("group_id", groupId);
+                            proIntent.putExtra("user_name", username);
+                            if (!TextUtils.isEmpty(userInfo)) {
+                                proIntent.putExtra("user_info", userInfo);
+                            }
+                            startActivityForResult(proIntent, PICK_REG_VIDEO);
+                            finish();
+                        }
                         break;
-                    default:
+                        case 2: { // atlas
+                            Intent proIntent = new Intent(FaceRegisterActivity.this, FaceDepthRegisterActivity.class);
+                            proIntent.putExtra("group_id", groupId);
+                            proIntent.putExtra("user_name", username);
+                            if (!TextUtils.isEmpty(userInfo)) {
+                                proIntent.putExtra("user_info", userInfo);
+                            }
+                            startActivityForResult(proIntent, PICK_REG_VIDEO);
+                            finish();
+
+                        }
                         break;
+                        default:
+                            break;
+                    }
                 }
             }
-
         } else if (view == settingButton) {
             Intent intent = new Intent(this, SettingMainActivity.class);
             intent.putExtra("page_type", "register");

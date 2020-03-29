@@ -11,6 +11,7 @@ import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
@@ -31,6 +32,7 @@ import com.baidu.idl.face.main.model.User;
 import com.baidu.idl.face.main.utils.DensityUtils;
 import com.baidu.idl.face.main.utils.FaceOnDrawTexturViewUtil;
 import com.baidu.idl.face.main.utils.FileUtils;
+import com.baidu.idl.face.main.utils.PlatformUtils;
 import com.baidu.idl.face.main.view.CircleImageView;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.FaceInfo;
@@ -61,6 +63,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
     private RelativeLayout relativeLayout;
     private int mLiveType;
     private float mRgbLiveScore;
+
+    private User detectUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +148,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
                                     @Override
                                     public void onFaceDetectCallback(LivenessModel livenessModel) {
                                         // 输出结果
+                                        Log.e("Face","FaceDetect");
                                         checkCloseResult(livenessModel);
                                     }
 
@@ -186,6 +191,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
                 if (livenessModel == null || livenessModel.getFaceInfo() == null) {
                     mTrackText.setVisibility(View.GONE);
                     mDetectText.setText("未检测到人脸");
+                    Log.e("Face","NoFace");
                     mDetectImage.setImageResource(R.mipmap.ic_littleicon);
                     return;
                 } else {
@@ -208,6 +214,16 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
                             mTrackText.setText("识别成功");
                             mTrackText.setBackgroundColor(Color.rgb(66, 147, 136));
                             mDetectText.setText("欢迎您， " + user.getUserName());
+                            Log.e("识别成功","欢迎您， " + user.getUserName());
+
+                            //跳转登录成功
+                            //*
+                            if(getIntent().getStringExtra("page_type")!=null && "login".equals(getIntent().getStringExtra("page_type"))) {
+                                detectUser=user;
+                                getIntent().putExtra("page_type","detect");
+                                //,,,,,
+                            }
+                            //*/
                         }
                     } else {
                         float rgbLivenessScore = livenessModel.getRgbLivenessScore();
@@ -243,6 +259,14 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
                 }
             }
         });
+        Log.e("Face","ThreadDone.");
+        if(getIntent().getStringExtra("page_type")!=null && "detect".equals(getIntent().getStringExtra("page_type")))
+        {
+            getIntent().putExtra("page_type","LoginDone.");
+            PlatformUtils.Login(detectUser);
+            startActivity(new Intent(mContext, WelcomeActivity.class));
+            finish();
+        }
     }
 
     @Override
@@ -312,5 +336,13 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
 
             }
         });
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        CameraPreviewManager.getInstance().stopPreview();
+        FaceSDKManager.getInstance().initConfig();
     }
 }

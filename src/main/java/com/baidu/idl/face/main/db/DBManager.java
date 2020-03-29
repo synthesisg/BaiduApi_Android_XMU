@@ -450,9 +450,10 @@ public class DBManager {
      * 更新用户
      */
     public boolean updateUser(User user) {
+        Log.e("DB","Begin updateUser , uuid = "+user.getUserId());
         boolean success = false;
         if (mDBHelper == null) {
-            return success;
+            return false;
         }
 
         try {
@@ -460,23 +461,32 @@ public class DBManager {
             beginTransaction(mDatabase);
 
             if (user != null) {
-                mDatabase.beginTransaction();
+                //mDatabase.beginTransaction();======????
+                /* 旧版 新版取消gid
                 String where = "user_id = ? and group_id = ?";
                 String[] whereValue = { user.getUserId(), user.getGroupId() };
+                */
+                String where = "user_id = ?";
+                String[] whereValue = { user.getUserId()};
                 ContentValues cv = new ContentValues();
 
                 cv.put("user_id", user.getUserId());
                 cv.put("user_name", user.getUserName());
                 cv.put("group_id", user.getGroupId());
+                cv.put("user_info", user.getUserInfo());
                 cv.put("image_name", user.getImageName());
                 cv.put("update_time", System.currentTimeMillis());
 
+                cv.put("feature", user.getFeature());
+
                 if (mDatabase.update(DBHelper.TABLE_USER, cv, where, whereValue) < 0) {
+                    Log.e("DB","End updateUser false");
                     return false;
                 }
             }
             setTransactionSuccessful(mDatabase);
             success = true;
+            Log.e("DB","End updateUser true, msg="+user.getUserInfo());
         } finally {
             endTransaction(mDatabase);
         }

@@ -27,10 +27,6 @@ public class BaseFileActivity extends BaseActivity implements View.OnClickListen
 
     private Context mContext;
 
-    private Boolean isInitConfig;
-    private Boolean isConfigExit;
-
-
     private Button btnBaseDownload, btnBaseUpload,btnBaseZip,btnBazeUnzip;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -114,7 +110,7 @@ public class BaseFileActivity extends BaseActivity implements View.OnClickListen
                 break;
             case R.id.btn_base1:
                 LogUtils.d("[base]","BASE1");
-                startActivity(new Intent(BaseFileActivity.this, Base1Activity.class));
+                startActivity(new Intent(BaseFileActivity.this, FrontPageActivity.class));
                 break;
             case R.id.btn_base2:
                 LogUtils.d("[base]","BASE2");

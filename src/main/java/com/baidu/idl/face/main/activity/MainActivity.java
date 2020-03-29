@@ -178,7 +178,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.btn_base1:
                 LogUtils.d("[base]","BASE1");
-                startActivity(new Intent(MainActivity.this, Base1Activity.class));
+                startActivity(new Intent(MainActivity.this, FrontPageActivity.class));
                 break;
             case R.id.btn_base2:
                 LogUtils.d("[base]","BASE2");

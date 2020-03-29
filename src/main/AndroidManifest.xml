@@ -96,9 +96,11 @@
         <activity android:name="com.baidu.idl.face.main.activity.setting.MirrorSettingActivity"/>
 
 
-        <activity android:name="com.baidu.idl.face.main.activity.Base1Activity"/>
+        <activity android:name="com.baidu.idl.face.main.activity.FrontPageActivity"/>
         <activity android:name="com.baidu.idl.face.main.activity.Base2Activity"/>
         <activity android:name="com.baidu.idl.face.main.activity.BaseFileActivity"/>
+        <activity android:name="com.baidu.idl.face.main.activity.WelcomeActivity"/>
+        <activity android:name="com.baidu.idl.face.main.activity.FileDownloadActivity"/>
 
         <!-- 安全设备指纹接入 start -->
         <activity

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:gravity="right"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+    <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_version"
+            android:layout_marginTop="30dp"
+            android:gravity="center_horizontal"
+            android:text="欢迎"
+            android:textColor="@color/black"
+            android:textSize="30sp" />
+
+    <Button
+            android:id="@+id/btn_update_base"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="67dp"
+            android:background="@drawable/fillet_style_button_selector"
+            android:gravity="center_horizontal"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="更新基本数据"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+    <Button
+            android:id="@+id/btn_update_face"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_update_base"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/fillet_style_button_selector"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="更新人脸数据"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+
+
+    <Button
+            android:id="@+id/btn_information"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_update_face"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/fillet_style_button_selector"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="信息查看"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    <Button
+        android:id="@+id/btn_download"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_information"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/fillet_style_button_selector"
+        android:maxLines="1"
+        android:padding="10dp"
+        android:text="文档下载"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+    <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_download"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/fillet_style_button_selector"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="登出"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+</RelativeLayout>
