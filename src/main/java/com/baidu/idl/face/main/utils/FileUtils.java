@@ -2,6 +2,7 @@ package com.baidu.idl.face.main.utils;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.*;
 import java.util.Enumeration;
@@ -51,7 +52,6 @@ public class FileUtils {
             return false;
         }
 
-        RandomAccessFile mm = null;
         boolean flag = false;
         FileOutputStream fileOutputStream = null;
         try {
@@ -61,6 +61,60 @@ public class FileUtils {
             flag = true;
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        return flag;
+    }
+
+    /**
+     * 写入文件
+     */
+    public static boolean write2SDFromInput(InputStream input, String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) { file.createNewFile(); }
+        Log.e("write2SDFromInput","Begin , path = "+filePath );
+        FileOutputStream  output = null;
+        BufferedInputStream  bis =null;
+        BufferedOutputStream bos=null;
+        boolean flag = false;
+        try {
+            output = new FileOutputStream(file);
+            bis = new BufferedInputStream(input);
+            bos= new BufferedOutputStream(output);
+            /*
+            byte [] buffer = new byte[4 * 1024];
+            while(input.read(buffer) != -1){
+                output.write(buffer);
+                output.flush();
+            }
+            */
+            int b = 0;
+            byte[] byArr = new byte[1024];
+            while((b= bis.read(byArr))!=-1){
+                bos.write(byArr, 0, b);
+            }
+            flag=true;
+            Log.e("write2SDFromInput","End." );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            /*
+            try {
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            */
+            try {
+                if(bis !=null){
+                    bis.close();
+                }
+                if(bos !=null){
+                    bos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return flag;
     }

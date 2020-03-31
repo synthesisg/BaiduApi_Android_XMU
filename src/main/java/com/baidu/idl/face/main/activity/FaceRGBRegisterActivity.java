@@ -469,10 +469,16 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                 User update_user= PlatformUtils.getUser();
                 update_user.setFeature(faceFeature);
                 FaceApi.getInstance().userUpdate(update_user);
+
+                File faceDir = FileUtils.getBatchImportSuccessDirectory();
+                File file = new File(faceDir, imageName);
+                ImageUtils.resize(rgbBitmap, file, 300, 300);
+
             //连接两数据库==========================================================上传服务器===========================================
                 PlatformUtils.setUser(update_user);
                 FaceApi.getInstance().initDatabases(true);
                 Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
+                Log.e("FaceUpdate", "UpdateFace");
                 startActivity(new Intent(FaceRGBRegisterActivity.this, WelcomeActivity.class));
             }
 

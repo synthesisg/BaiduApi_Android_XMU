@@ -56,9 +56,10 @@ public class WelcomeActivity extends BaseActivity implements View.OnClickListene
             PlatformUtils.Logout();
             Toast.makeText(WelcomeActivity.this, "非法访问，请重新登录。", Toast.LENGTH_LONG).show();
             startActivity(new Intent(WelcomeActivity.this, FrontPageActivity.class));
+            finish();
         }
         TextView titleTv = findViewById(R.id.tv_title);
-        titleTv.setText("欢迎，"+ PlatformUtils.getUser().getUserName()+"！Group="+PlatformUtils.getUser().getGroupId());
+        if (PlatformUtils.getUser()!=null && PlatformUtils.getUser().getUserName()!=null) titleTv.setText("欢迎，"+ PlatformUtils.getUser().getUserName()+"！Group="+PlatformUtils.getUser().getGroupId());
 
         btnUpdateBase.setOnClickListener(this);
         btnUpdateFace.setOnClickListener(this);

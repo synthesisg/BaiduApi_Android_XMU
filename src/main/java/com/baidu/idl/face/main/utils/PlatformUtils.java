@@ -1,11 +1,9 @@
 package com.baidu.idl.face.main.utils;
 
+import android.util.Log;
 import com.baidu.idl.face.main.model.User;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
@@ -44,11 +42,11 @@ public class PlatformUtils {
     {
 
     }
-    public void updateUser()
+    public static void updateUser()
     {
 
     }
-    public String conn(String _url, Map<String, String> map)
+    public static String conn(String _url, Map<String, String> map)
     {
         try {
             URL url = new URL(_url);
@@ -94,11 +92,44 @@ public class PlatformUtils {
         }
         return "-1";
     }
-    public static void Login(String name)
-    {
-        username=name;
-        isLogin=true;
+
+    //android.os.NetworkOnMainThreadException
+    public static boolean downlaodFile(String urlStr, String path, String fileName) {
+        Log.e("PlatformUtils","[downlaodFile] url = "+urlStr);
+        InputStream input = null;
+        try {
+            Log.e("PlatformUtils","[getInputStearmFormUrl] url = " + urlStr);
+            URL url = new URL(urlStr);
+            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setRequestMethod("GET");
+            //urlConn.setDoOutput(true);
+            //urlConn.setDoInput(true);
+            urlConn.setRequestProperty("Content-Type", "application/octet-stream");
+            urlConn.setRequestProperty("Connection", "Keep-Alive");
+            urlConn.setRequestProperty("Charset", "UTF-8");
+            urlConn.connect();
+            Log.e("PlatformUtils","[getInputStearmFormUrl] CONN" );
+            input = urlConn.getInputStream();
+            Log.e("PlatformUtils","[getInputStearmFormUrl] input = "+ (input!=null) +", len = " + urlConn.getContentLength()+", path = "  +path+File.separator+fileName );
+
+            if (input==null) return false;
+
+            boolean succ = FileUtils.write2SDFromInput(input, path+File.separator+fileName);
+            Log.e("PlatformUtils","[downlaodFile] done, succ = " + succ );
+            return succ;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        finally {
+            try {
+                if(input!=null) input.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
     public static void Login(User _user)
     {
         user=_user;
