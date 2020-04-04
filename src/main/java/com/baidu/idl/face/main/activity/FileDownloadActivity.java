@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +27,10 @@ import com.baidu.idl.facesdkdemo.R;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
+
+import static java.lang.Thread.sleep;
 
 public class FileDownloadActivity extends BaseActivity implements View.OnClickListener,
         OnItemClickListener, OnItemLongClickListener {
@@ -46,7 +48,11 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
 
 
         mContext = this;
-        initView();
+        try {
+            initView();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -57,7 +63,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
     /**
      * UI 相关VIEW 初始化
      */
-    private void initView() {
+    private void initView() throws InterruptedException {
         btnBaseDownload = findViewById(R.id.btn_basedd);
         btnBaseUpload = findViewById(R.id.btn_baseud);
         btnBaseZip = findViewById(R.id.btn_basezip);
@@ -79,6 +85,26 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         recyclerView.setAdapter(adapter);
         adapter.setItemClickListener(this);
         adapter.setItemLongClickListener(this);
+
+        //testimpl
+        //String txt=PlatformUtils.testimpl();
+        //Toast.makeText(this, txt, Toast.LENGTH_LONG).show();
+        NetworkUtils.MSGThread th= new NetworkUtils.MSGThread(null,null,null);
+        th.start();
+        int cnt=0;
+        while (th.getCode()==0&&cnt<NetworkUtils.WaitSec) {
+            sleep(1000);
+            cnt++;
+        }
+        if(th.getCode()==0)
+        {
+            Toast.makeText(this, "Connection failed.", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            Toast.makeText(this, th.getMessage(), Toast.LENGTH_LONG).show();
+        }
+        //Log.e("IMPL","Got");
     }
 
     /**
@@ -216,7 +242,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
     @Override
     public void onItemClick(View view, int position) {
         Toast.makeText(this, "pos = "+position, Toast.LENGTH_SHORT).show();
-        DLThread th= new DLThread(adapter.getDat(position));
+        NetworkUtils.DLThread th= new NetworkUtils.DLThread(adapter.getDat(position));
         th.start();
         Log.e("Download","Begin from "+adapter.getDat(position).url);
         //boolean succ=PlatformUtils.downlaodFile(adapter.getDat(position).url,FileUtils.getSDRootFile().getPath()+"/ademo",adapter.getDat(position).name);
@@ -253,18 +279,5 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         */
     }
 
-    public class DLThread extends Thread {
-        private dat item;
 
-        public DLThread(dat _item) {
-            item=_item;
-            Log.e("DLThread","Create , url = " + item.url);
-        }
-
-        public void run() {
-            Log.e("DLThread","Begin , path = "+ FileUtils.getSDRootFile().getPath()+"/ademo" + ", url = " + item.url);
-            PlatformUtils.downlaodFile(item.url,FileUtils.getSDRootFile().getPath()+"/ademo",item.name);
-            Log.e("DLThread","End .");
-        }
-    }
 }

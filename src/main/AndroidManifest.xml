@@ -101,6 +101,7 @@
         <activity android:name="com.baidu.idl.face.main.activity.BaseFileActivity"/>
         <activity android:name="com.baidu.idl.face.main.activity.WelcomeActivity"/>
         <activity android:name="com.baidu.idl.face.main.activity.FileDownloadActivity"/>
+        <activity android:name="com.baidu.idl.face.main.activity.FaceAnalyseActivity"/>
 
         <!-- 安全设备指纹接入 start -->
         <activity

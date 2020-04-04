@@ -100,7 +100,7 @@ public class FaceUserInfoActivity extends BaseActivity implements View.OnClickLi
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.getStringExtra("page_type") != null && "user_info".equals(intent.getStringExtra("page_type"))) {
-                User user= PlatformUtils.getUser();
+                User user= PlatformUtils.getInstance().getUser();
                 intent.putExtra("group_id",user.getGroupId());
                 intent.putExtra("user_id",user.getUserId());
                 intent.putExtra("user_name",user.getUserName());

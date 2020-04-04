@@ -1,21 +1,26 @@
 package com.baidu.idl.face.main.utils;
 
 import android.util.Log;
+import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.model.User;
+import com.baidu.idl.face.main.model.uuid_utime;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
+import java.util.*;
+
+import android.util.Pair;
+import android.util.Base64;
 
 public class PlatformUtils {
     private static PlatformUtils instance;
     private static boolean isLogin=false;
-    private static String username=null;
     private static User user=null;
     /*
     * conn...
     * */
+
     private PlatformUtils()
     {
         //单例
@@ -26,127 +31,132 @@ public class PlatformUtils {
         }
         return instance;
     }
-    public void addUser()
+    public boolean addUser(User add_user)
     {
-        String username=null,groupId=null,userInfo=null;
-        byte[] faceFeature=null;
-        String imageName = groupId + "-" + username + ".jpg";
-
-        //registerUserIntoDBmanager(groupId, username, imageName, userInfo, faceFeature);
+        return false;
+        /*
+        Pair<Integer,String> pair = NetworkUtils.conn_post(NetworkUtils.URL_h + "ADD",User2Map(add_user));
+        if(pair.first==200) return true;
+        return false;
+        //*/
     }
-    public void queryUser(String username)
+    public boolean updateUser(User update_user)
     {
-
+        return false;
+        /*
+        Pair<Integer,String> pair = NetworkUtils.conn_post(NetworkUtils.URL_h + "UPDATE",User2Map(update_user));
+        if(pair.first==200) return true;
+        return false;
+        //*/
     }
-    public void queryList()
+    public User queryUserByUUID(String uuid)
     {
-
+        Map<String, String> map=new HashMap<>();
+        map.put("uuid",uuid);
+        Pair<Integer,String> pair = NetworkUtils.conn_get(NetworkUtils.URL_h + "Query",map);
+        if(pair.first==200) return String2User(pair.second);
+        return null;
     }
-    public static void updateUser()
+    public List<uuid_utime> queryAllUser_time()
     {
-
+        List<uuid_utime> lists=new ArrayList<>();
+        Pair<Integer,String> pair = NetworkUtils.conn_get(NetworkUtils.URL_h + "QueryUI",null);
+        if(pair.first==200) String2User(pair.second);
+        return  lists;
     }
-    public static String conn(String _url, Map<String, String> map)
+    public List<User> queryAllUser()
     {
-        try {
-            URL url = new URL(_url);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            // 设置请求参数（过期时间，输入、输出流、访问方式），以流的形式进行连接
-            // 设置是否向HttpURLConnection输出
-            connection.setDoOutput(false);  //POST为true
-            connection.setDoInput(true);
-            connection.setRequestMethod("GET");//POST
-            // 设置是否使用缓存
-            connection.setUseCaches(true);//可false
-            // 设置此 HttpURLConnection 实例是否应该自动执行 HTTP 重定向
-            connection.setInstanceFollowRedirects(true);
-            connection.setConnectTimeout(3000);
-
-            // 写入数据
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            StringBuffer sBuffer = new StringBuffer();
-            for (String key : map.keySet()) {
-                sBuffer.append(key + "=" + map.get(key) + "&");
-            }
-            out.writeBytes(sBuffer.toString());
-            out.flush();
-            out.close();
-
-
-            connection.connect();
-            int code = connection.getResponseCode();
-            String msg = "";
-            if (code == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = null;
-                while ((line = reader.readLine()) != null) {msg += line + "\n"; }
-                reader.close();
-            }
-            connection.disconnect();
-            System.out.println(msg);
-            return msg;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "-1";
+        List<User> lists=new ArrayList<>();
+        Pair<Integer,String> pair = NetworkUtils.conn_get(NetworkUtils.URL_h + "Query",null);
+        if(pair.first==200) String2User(pair.second);
+        return  lists;
     }
+    public void UpdateData()
+    {
+        List<uuid_utime> locals = FaceApi.getInstance().getLocalList();
+        List<uuid_utime> platforms =queryAllUser_time();
 
-    //android.os.NetworkOnMainThreadException
-    public static boolean downlaodFile(String urlStr, String path, String fileName) {
-        Log.e("PlatformUtils","[downlaodFile] url = "+urlStr);
-        InputStream input = null;
-        try {
-            Log.e("PlatformUtils","[getInputStearmFormUrl] url = " + urlStr);
-            URL url = new URL(urlStr);
-            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-            urlConn.setRequestMethod("GET");
-            //urlConn.setDoOutput(true);
-            //urlConn.setDoInput(true);
-            urlConn.setRequestProperty("Content-Type", "application/octet-stream");
-            urlConn.setRequestProperty("Connection", "Keep-Alive");
-            urlConn.setRequestProperty("Charset", "UTF-8");
-            urlConn.connect();
-            Log.e("PlatformUtils","[getInputStearmFormUrl] CONN" );
-            input = urlConn.getInputStream();
-            Log.e("PlatformUtils","[getInputStearmFormUrl] input = "+ (input!=null) +", len = " + urlConn.getContentLength()+", path = "  +path+File.separator+fileName );
+        List<String> DelLists = new ArrayList<>();
+        List<String> UpdateLists = new ArrayList<>();
+        List<String> AddLists = new ArrayList<>();
 
-            if (input==null) return false;
+        List<String> LocalUidList = new LinkedList<>();
+        for(uuid_utime item : locals)
+            LocalUidList.add(item.uuid);
 
-            boolean succ = FileUtils.write2SDFromInput(input, path+File.separator+fileName);
-            Log.e("PlatformUtils","[downlaodFile] done, succ = " + succ );
-            return succ;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        finally {
-            try {
-                if(input!=null) input.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        for(uuid_utime item : platforms)
+        {
+            if(locals.contains(item))
+            {
+                //比对正确 剔除
+                LocalUidList.remove(item.uuid);
+            } else if (LocalUidList.contains(item.uuid))
+            {
+                //更新时间不一致 更新
+                UpdateLists.add(item.uuid);
+                LocalUidList.remove(item.uuid);
+            } else
+            {
+                //本地无记录 添加
+                AddLists.add(item.uuid);
             }
         }
+        //服务器无记录 删除
+        for(String uid : LocalUidList)
+            DelLists.add(uid);
+
+        for(String uid : DelLists) Log.e("DEL","uid = " + uid);
+        for(String uid : UpdateLists) Log.e("UPD","uid = " + uid);
+        for(String uid : AddLists) Log.e("ADD","uid = " + uid);
+
+        /*
+        for(String uid : DelLists) FaceApi.getInstance().userDelete(uid);
+        for(String uid : UpdateLists)
+        {
+            FaceApi.getInstance().userUpdate(queryUserByUUID(uid));
+        }
+        for(String uid : AddLists)
+        {
+            FaceApi.getInstance().userAdd(queryUserByUUID(uid));
+        }
+         //*/
     }
 
-    public static void Login(User _user)
+
+    private User String2User(String string)
+    {
+        return new User();
+    }
+    private Map<String, String> User2Map(User _user)
+    {
+        Map<String, String> ret=new HashMap<>();
+        ret.put("uuid",_user.getUserId());
+        ret.put("user_name",_user.getUserName());
+        ret.put("group_id",_user.getGroupId());
+        ret.put("user_info",_user.getUserInfo());
+        ret.put("feature", Base64.encodeToString(_user.getFeature(), Base64.DEFAULT));
+        //String str2 = new String(Base64.decode(strBase64.getBytes(), Base64.DEFAULT));
+        ret.put("image_name",_user.getImageName());
+        //ret.put("face_token",_user.getFaceToken());
+        ret.put("update_time",""+_user.getUpdateTime());
+        return ret;
+    }
+    public void Login(User _user)
     {
         user=_user;
         isLogin=true;
     }
-    public static void Logout()
+    public void Logout()
     {
-        username=null;
         user=null;
         isLogin=false;
     }
-    public static User getUser()
+    public User getUser()
     {
         return user;
     }
-    public static void setUser(User _user) { user=_user; }
-    public static boolean isLogin()
+    public void setUser(User _user) { user=_user; }
+    public boolean isLogin()
     {
         return isLogin;
     }

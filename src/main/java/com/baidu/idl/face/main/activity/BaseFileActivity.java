@@ -27,7 +27,7 @@ public class BaseFileActivity extends BaseActivity implements View.OnClickListen
 
     private Context mContext;
 
-    private Button btnBaseDownload, btnBaseUpload,btnBaseZip,btnBazeUnzip;
+    private Button btnBaseDownload, btnBaseUpload,btnBaseZip,btnBaseUnzip,btnBaseAnalyse,btnBaseDetect;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +52,9 @@ public class BaseFileActivity extends BaseActivity implements View.OnClickListen
         btnBaseDownload = findViewById(R.id.btn_basedd);
         btnBaseUpload = findViewById(R.id.btn_baseud);
         btnBaseZip = findViewById(R.id.btn_basezip);
-        btnBazeUnzip = findViewById(R.id.btn_baseunzip);
+        btnBaseUnzip = findViewById(R.id.btn_baseunzip);
+        btnBaseAnalyse = findViewById(R.id.btn_base_analyse);
+        btnBaseDetect = findViewById(R.id.btn_base_detect);
 
         TextView versionTv = findViewById(R.id.tv_version);
         versionTv.setText(String.format(" V %s", Utils.getVersionName(mContext)));
@@ -60,7 +62,9 @@ public class BaseFileActivity extends BaseActivity implements View.OnClickListen
         btnBaseDownload.setOnClickListener(this);
         btnBaseUpload.setOnClickListener(this);
         btnBaseZip.setOnClickListener(this);
-        btnBazeUnzip.setOnClickListener(this);
+        btnBaseUnzip.setOnClickListener(this);
+        btnBaseAnalyse.setOnClickListener(this);
+        btnBaseDetect.setOnClickListener(this);
     }
 
     /**
@@ -97,26 +101,15 @@ public class BaseFileActivity extends BaseActivity implements View.OnClickListen
                 FileUtils.unzipFile(new File (path+"/cdx.zip"),path);
                 Toast.makeText(this, "Done.", Toast.LENGTH_LONG).show();
                 break;
-            /*
-            case R.id.btn_attribute:
-                startActivity(new Intent(BaseFileActivity.this, FaceAttributeRGBActivity.class));
+            case R.id.btn_base_analyse:
+                LogUtils.d("[base]","Analyse");
+                startActivity(new Intent(mContext, FaceAnalyseActivity.class));
                 break;
-            case R.id.btn_setting:
-                startActivity(new Intent(BaseFileActivity.this, SettingMainActivity.class));
+            case R.id.btn_base_detect:
+                LogUtils.d("[base]","Analyse");
+                startActivity(new Intent(mContext, FaceAttributeRGBActivity.class));
                 break;
-            case R.id.btn_auth:
-                // 跳转授权激活页面
-                startActivity(new Intent(BaseFileActivity.this, FaceAuthActicity.class));
-                break;
-            case R.id.btn_base1:
-                LogUtils.d("[base]","BASE1");
-                startActivity(new Intent(BaseFileActivity.this, FrontPageActivity.class));
-                break;
-            case R.id.btn_base2:
-                LogUtils.d("[base]","BASE2");
-                startActivity(new Intent(BaseFileActivity.this, Base2Activity.class));  //FaceRGBOpenDebugSearchActivity
-                break;
-                */
+
         }
         }catch (Exception ex){}
     }

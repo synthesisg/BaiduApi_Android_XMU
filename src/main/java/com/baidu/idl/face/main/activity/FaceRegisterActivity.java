@@ -77,9 +77,10 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
         if("update_base".equals(getIntent().getStringExtra("page_type")))
         {
             //填写默认信息
-            usernameEt.setText(PlatformUtils.getUser().getUserName());
-            userGroupEt.setText(PlatformUtils.getUser().getGroupId());
-            userInfoEt.setText(PlatformUtils.getUser().getUserInfo());
+            User user=PlatformUtils.getInstance().getUser();
+            usernameEt.setText(user.getUserName());
+            userGroupEt.setText(user.getGroupId());
+            userInfoEt.setText(user.getUserInfo());
 
             //UI修改
             autoDetectBtn.setText("保存修改");
@@ -97,7 +98,7 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
 
             final String username = usernameEt.getText().toString().trim();
             String now_name = null;
-            if(PlatformUtils.getUser()!=null) now_name=PlatformUtils.getUser().getUserName();
+            if(PlatformUtils.getInstance().getUser()!=null) now_name=PlatformUtils.getInstance().getUser().getUserName();
             if (TextUtils.isEmpty(username)) {
                 Toast.makeText(FaceRegisterActivity.this, "用户名不能为空", Toast.LENGTH_SHORT).show();
                 return;
@@ -153,14 +154,16 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
             //更新基本数据
             if(getIntent().getStringExtra("page_type")!=null && "update_base".equals(getIntent().getStringExtra("page_type")))
             {
-                User update_user=PlatformUtils.getUser();
+                User update_user=PlatformUtils.getInstance().getUser();
                 update_user.setUserName(usernameEt.getText().toString().trim());
                 update_user.setGroupId(userGroupEt.getText().toString().trim());
                 update_user.setUserInfo(userInfoEt.getText().toString().trim());
-                boolean succ=FaceApi.getInstance().userUpdate(update_user);//=======debug
+                update_user.setUpdateTime(System.currentTimeMillis());//手动改时间 因为服务器可能也修改
+                boolean succ=FaceApi.getInstance().userUpdate(update_user);
                 Log.e("update_base_succ",Boolean.toString(succ));
                 //连接两数据库==========================================================上传服务器===========================================
-                PlatformUtils.setUser(update_user);
+                PlatformUtils.getInstance().setUser(update_user);
+                PlatformUtils.getInstance().updateUser(update_user);
                 Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(mContext, WelcomeActivity.class));
                 finish();

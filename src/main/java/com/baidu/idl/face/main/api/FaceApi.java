@@ -11,6 +11,7 @@ import com.baidu.idl.face.main.db.DBManager;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.Group;
 import com.baidu.idl.face.main.model.User;
+import com.baidu.idl.face.main.model.uuid_utime;
 import com.baidu.idl.main.facesdk.FaceInfo;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
 import com.baidu.idl.main.facesdk.model.BDFaceSDKCommon;
@@ -137,6 +138,20 @@ public class FaceApi {
     }
 
     /**
+     * 更新前拉取本地列表用作比对
+     */
+    public List<uuid_utime> getLocalList()
+    {
+        List<uuid_utime> ret = new ArrayList<>();
+        List<User> userLists= DBManager.getInstance().queryAllUser();
+        for(User item : userLists)
+        {
+            ret.add(new uuid_utime(item.getUserId(),item.getUpdateTime()));
+        }
+        return null;
+    }
+
+    /**
      * 根据_id查找用户
      */
     public User getUserListById(int _id) {
@@ -187,6 +202,14 @@ public class FaceApi {
         }
 
         boolean ret = DBManager.getInstance().deleteUser(userId, groupId);
+        return ret;
+    }
+    public boolean userDelete(String userId) {
+        if (TextUtils.isEmpty(userId)) {
+            return false;
+        }
+
+        boolean ret = DBManager.getInstance().deleteUser(userId);
         return ret;
     }
 

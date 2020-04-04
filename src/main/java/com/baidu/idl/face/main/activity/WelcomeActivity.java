@@ -50,16 +50,17 @@ public class WelcomeActivity extends BaseActivity implements View.OnClickListene
 
         TextView versionTv = findViewById(R.id.tv_version);
         versionTv.setText(String.format(" V %s", Utils.getVersionName(mContext)));
-        if(PlatformUtils.isLogin()==false||PlatformUtils.getUser()==null)
+        if(PlatformUtils.getInstance().isLogin()==false||PlatformUtils.getInstance().getUser()==null)
         {
             //打回
-            PlatformUtils.Logout();
+            PlatformUtils.getInstance().Logout();
             Toast.makeText(WelcomeActivity.this, "非法访问，请重新登录。", Toast.LENGTH_LONG).show();
             startActivity(new Intent(WelcomeActivity.this, FrontPageActivity.class));
             finish();
         }
         TextView titleTv = findViewById(R.id.tv_title);
-        if (PlatformUtils.getUser()!=null && PlatformUtils.getUser().getUserName()!=null) titleTv.setText("欢迎，"+ PlatformUtils.getUser().getUserName()+"！Group="+PlatformUtils.getUser().getGroupId());
+        if (PlatformUtils.getInstance().getUser()!=null && PlatformUtils.getInstance().getUser().getUserName()!=null)
+            titleTv.setText("欢迎，"+ PlatformUtils.getInstance().getUser().getUserName()+"！Group="+PlatformUtils.getInstance().getUser().getGroupId());
 
         btnUpdateBase.setOnClickListener(this);
         btnUpdateFace.setOnClickListener(this);
@@ -105,7 +106,7 @@ public class WelcomeActivity extends BaseActivity implements View.OnClickListene
                     break;
                 case R.id.btn_logout:
                     LogUtils.d("[base]","btn_logout");
-                    PlatformUtils.Logout();
+                    PlatformUtils.getInstance().Logout();
                     startActivity(new Intent(mContext, FrontPageActivity.class));
                     break;
             }

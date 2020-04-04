@@ -38,6 +38,7 @@ import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
 import com.baidu.idl.main.facesdk.model.BDFaceSDKCommon;
 
 import java.io.File;
+import java.util.List;
 
 import static com.baidu.idl.face.main.activity.FaceMainSearchActivity.PAGE_TYPE;
 
@@ -123,7 +124,6 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                 (int) (w * GlobalSet.SURFACE_RATIO), (int) (h * GlobalSet.SURFACE_RATIO),
                 Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         mPreviewView.setLayoutParams(cameraFL);
-
     }
 
 
@@ -172,8 +172,6 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
 
                 // 拿到相机帧数
                 faceDetect(data, width, height);
-
-
             }
         });
     }
@@ -204,7 +202,6 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                     // 展示model
                     checkResult(livenessModel);
                 }
-
             }
 
             @Override
@@ -422,15 +419,15 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                     File faceDir = FileUtils.getBatchImportSuccessDirectory();
                     File file = new File(faceDir, imageName);
                     ImageUtils.resize(rgbBitmap, file, 300, 300);
-
-                /*
-                ======================================================================上传服务器================================
-
-
-                //*/
-
                     // 数据变化，更新内存
                     FaceApi.getInstance().initDatabases(true);
+
+                //*
+                //======================================================================上传服务器================================
+                    List<User> lists = FaceApi.getInstance().getUserListByUserName(groupId,username);
+                    PlatformUtils.getInstance().addUser(lists[0]);
+                //*/
+
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -466,7 +463,7 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                 }
             } else {
                 //修改部分
-                User update_user= PlatformUtils.getUser();
+                User update_user= PlatformUtils.getInstance().getUser();
                 update_user.setFeature(faceFeature);
                 FaceApi.getInstance().userUpdate(update_user);
 
@@ -475,7 +472,7 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                 ImageUtils.resize(rgbBitmap, file, 300, 300);
 
             //连接两数据库==========================================================上传服务器===========================================
-                PlatformUtils.setUser(update_user);
+                PlatformUtils.getInstance().setUser(update_user);
                 FaceApi.getInstance().initDatabases(true);
                 Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
                 Log.e("FaceUpdate", "UpdateFace");

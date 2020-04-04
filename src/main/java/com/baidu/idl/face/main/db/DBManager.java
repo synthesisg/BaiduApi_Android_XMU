@@ -315,6 +315,23 @@ public class DBManager {
         return null;
     }
 
+    public List<User> queryAllUser() {
+        Cursor cursor = null;
+        List<User> users = new ArrayList<>();
+        try {
+            if (mDBHelper == null) {
+                return null;
+            }
+            SQLiteDatabase db = mDBHelper.getReadableDatabase();
+            cursor = db.query(DBHelper.TABLE_USER, null, null, null, null, null, null);
+            while (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
+                users.add(Cursor2User(cursor));
+            }
+        } finally {
+            closeCursor(cursor);
+        }
+        return users;
+    }
     /**
      * 查询用户（根据groupId）
      */
@@ -330,28 +347,7 @@ public class DBManager {
             String[] whereValue = { groupId };
             cursor = db.query(DBHelper.TABLE_USER, null, where, whereValue, null, null, null);
             while (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
-                int dbId = cursor.getInt(cursor.getColumnIndex("_id"));
-                String userId = cursor.getString(cursor.getColumnIndex("user_id"));
-                String userName = cursor.getString(cursor.getColumnIndex("user_name"));
-                String userInfo = cursor.getString(cursor.getColumnIndex("user_info"));
-                String faceToken = cursor.getString(cursor.getColumnIndex("face_token"));
-                byte[] feature = cursor.getBlob(cursor.getColumnIndex("feature"));
-                String imageName = cursor.getString(cursor.getColumnIndex("image_name"));
-                long updateTime = cursor.getLong(cursor.getColumnIndex("update_time"));
-                long ctime = cursor.getLong(cursor.getColumnIndex("ctime"));
-
-                User user = new User();
-                user.setId(dbId);
-                user.setUserId(userId);
-                user.setGroupId(groupId);
-                user.setUserName(userName);
-                user.setCtime(ctime);
-                user.setUpdateTime(updateTime);
-                user.setUserInfo(userInfo);
-                user.setFaceToken(faceToken);
-                user.setFeature(feature);
-                user.setImageName(imageName);
-                users.add(user);
+                users.add(Cursor2User(cursor));
             }
         } finally {
             closeCursor(cursor);
@@ -374,27 +370,7 @@ public class DBManager {
             String[] whereValue = { userName, groupId };
             cursor = db.query(DBHelper.TABLE_USER, null, where, whereValue, null, null, null);
             if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
-                int dbId = cursor.getInt(cursor.getColumnIndex("_id"));
-                String userId = cursor.getString(cursor.getColumnIndex("user_id"));
-                String userInfo = cursor.getString(cursor.getColumnIndex("user_info"));
-                String faceToken = cursor.getString(cursor.getColumnIndex("face_token"));
-                byte[] feature = cursor.getBlob(cursor.getColumnIndex("feature"));
-                String imageName = cursor.getString(cursor.getColumnIndex("image_name"));
-                long updateTime = cursor.getLong(cursor.getColumnIndex("update_time"));
-                long ctime = cursor.getLong(cursor.getColumnIndex("ctime"));
-
-                User user = new User();
-                user.setId(dbId);
-                user.setUserId(userId);
-                user.setGroupId(groupId);
-                user.setUserName(userName);
-                user.setCtime(ctime);
-                user.setUpdateTime(updateTime);
-                user.setUserInfo(userInfo);
-                user.setFeature(feature);
-                user.setImageName(imageName);
-                user.setFaceToken(faceToken);
-                users.add(user);
+                users.add(Cursor2User(cursor));
             }
         } finally {
             closeCursor(cursor);
@@ -417,28 +393,7 @@ public class DBManager {
             String[] whereValue = { String.valueOf(_id) };
             cursor = db.query(DBHelper.TABLE_USER, null, where, whereValue, null, null, null);
             if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
-                String groupId = cursor.getString(cursor.getColumnIndex("group_id"));
-                String userId = cursor.getString(cursor.getColumnIndex("user_id"));
-                String userName = cursor.getString(cursor.getColumnIndex("user_name"));
-                String userInfo = cursor.getString(cursor.getColumnIndex("user_info"));
-                String faceToken = cursor.getString(cursor.getColumnIndex("face_token"));
-                byte[] feature = cursor.getBlob(cursor.getColumnIndex("feature"));
-                String imageName = cursor.getString(cursor.getColumnIndex("image_name"));
-                long updateTime = cursor.getLong(cursor.getColumnIndex("update_time"));
-                long ctime = cursor.getLong(cursor.getColumnIndex("ctime"));
-
-                User user = new User();
-                user.setId(_id);
-                user.setUserId(userId);
-                user.setGroupId(groupId);
-                user.setUserName(userName);
-                user.setCtime(ctime);
-                user.setUpdateTime(updateTime);
-                user.setUserInfo(userInfo);
-                user.setFeature(feature);
-                user.setImageName(imageName);
-                user.setFaceToken(faceToken);
-                users.add(user);
+                users.add(Cursor2User(cursor));
             }
         } finally {
             closeCursor(cursor);
@@ -475,7 +430,7 @@ public class DBManager {
                 cv.put("group_id", user.getGroupId());
                 cv.put("user_info", user.getUserInfo());
                 cv.put("image_name", user.getImageName());
-                cv.put("update_time", System.currentTimeMillis());
+                cv.put("update_time", user.getUpdateTime());
 
                 cv.put("feature", user.getFeature());
 
@@ -552,7 +507,44 @@ public class DBManager {
         }
         return success;
     }
+    public boolean deleteUser(String userId) {
+        boolean success = false;
+        try {
+            mDatabase = mDBHelper.getWritableDatabase();
+            beginTransaction(mDatabase);
 
+            if (!TextUtils.isEmpty(userId)) {
+                String where = "user_id = ? ";
+                String[] whereValue = {userId};
+
+                if (mDatabase.delete(DBHelper.TABLE_USER, where, whereValue) < 0) {
+                    return false;
+                }
+                setTransactionSuccessful(mDatabase);
+                success = true;
+            }
+
+        } finally {
+            endTransaction(mDatabase);
+        }
+        return success;
+    }
+
+    private User Cursor2User(Cursor cursor)
+    {
+        User user=new User();
+        user.setId(cursor.getInt(cursor.getColumnIndex("_id")));
+        user.setUserId(cursor.getString(cursor.getColumnIndex("user_id")));
+        user.setGroupId(cursor.getString(cursor.getColumnIndex("group_id")));
+        user.setUserName(cursor.getString(cursor.getColumnIndex("user_name")));
+        user.setCtime(cursor.getLong(cursor.getColumnIndex("ctime")));
+        user.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
+        user.setUserInfo(cursor.getString(cursor.getColumnIndex("user_info")));
+        user.setFeature(cursor.getBlob(cursor.getColumnIndex("feature")));
+        user.setImageName(cursor.getString(cursor.getColumnIndex("image_name")));
+        user.setFaceToken(cursor.getString(cursor.getColumnIndex("face_token")));
+        return user;
+    }
     // ---------------------------------------用户相关 end------------------------------------------
 
     private void beginTransaction(SQLiteDatabase mDatabase) {
