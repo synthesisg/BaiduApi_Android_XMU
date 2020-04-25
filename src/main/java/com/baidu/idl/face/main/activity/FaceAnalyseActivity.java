@@ -3,6 +3,7 @@ package com.baidu.idl.face.main.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.FaceDetector;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -16,6 +17,7 @@ import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.utils.ImageUtils;
+import com.baidu.idl.face.main.utils.TransformUtils;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.FaceInfo;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
@@ -36,7 +38,6 @@ import java.io.UnsupportedEncodingException;
 public class FaceAnalyseActivity extends BaseActivity implements View.OnClickListener {
 
     private ImageView imgFirst;
-    private ImageView imgSecond;
     private TextView tvState;
     private TextView tvScore;
     private TextView tvCurrentThreshold;
@@ -45,11 +46,12 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
     private static final int PICK_VIDEO_FRIST = 101;
 
     private byte[] firstFeature = new byte[512];
-    private byte[] secondFeature = new byte[512];
 
     private volatile boolean firstFeatureFinished = false;
     public static final int SOURCE_DETECT = 0; // 采集
     public static final int SOURCE_IR_DETECT = 0; // 采集
+
+    private String msg = "";
 
 
     @Override
@@ -66,7 +68,6 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
         Button btSetting = findViewById(R.id.btn_setting);
         Button backBtn = findViewById(R.id.btn_back);
         imgFirst = findViewById(R.id.img_first);
-        imgSecond = findViewById(R.id.img_second);
         tvScore = findViewById(R.id.tv_score);
         tvState = findViewById(R.id.tv_state);
         modelType = findViewById(R.id.tv_model_type);
@@ -204,10 +205,14 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
     private void syncFeature(final Bitmap bitmap, final byte[] feature, final int index, boolean isFromPhotoLibrary) {
         float ret = -1;
         BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
-        FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect()
-                .detect(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
+        FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect().detect(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
         // 检测结果判断
         if (faceInfos != null && faceInfos.length > 0) {
+            //* 特征提取测试
+            TransformUtils.liveness(bitmap);//score
+            msg = TransformUtils.Bitmap2Msg(bitmap);
+            Log.e("syncFeature","faceInfo = " + msg);
+            //*/
             Log.e("syncFeature","faceInfos.length = " + faceInfos.length + " ,landmarks = " + faceInfos[0].landmarks.length);
             // 判断质量检测，针对模糊度、遮挡、角度
             if (qualityCheck(faceInfos[0], isFromPhotoLibrary)) {
@@ -275,8 +280,9 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        modelType.setText("当前特征抽取模型:" + "证件照模型");
-        tvCurrentThreshold.setText("相似度阈值：" + idFeatureValue);
+        modelType.setText("当前特征抽取模型: 证件照模型, 阈值 = " + idFeatureValue);
+        //tvCurrentThreshold.setText("相似度阈值：" + idFeatureValue);
+        tvCurrentThreshold.setText("面部：" + msg);
     }
 
     private void toast(final String tip) {

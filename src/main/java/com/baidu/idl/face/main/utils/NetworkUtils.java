@@ -170,6 +170,7 @@ public class NetworkUtils {
             Log.e("DLThread","End .");
         }
     }
+
     public static class MSGThread extends Thread{
         private String message=null;
         private int code=0;

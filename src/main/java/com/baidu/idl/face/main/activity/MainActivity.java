@@ -2,8 +2,11 @@ package com.baidu.idl.face.main.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -11,18 +14,24 @@ import android.widget.Toast;
 
 import com.baidu.idl.face.main.db.DBManager;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
-import com.baidu.idl.face.main.utils.ConfigUtils;
+import com.baidu.idl.face.main.utils.*;
 import com.baidu.idl.face.main.listener.SdkInitListener;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
-import com.baidu.idl.face.main.utils.LogUtils;
-import com.baidu.idl.face.main.utils.ToastUtils;
-import com.baidu.idl.face.main.utils.Utils;
 import com.baidu.idl.facesdkdemo.R;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * 主功能页面，包含人脸检索入口，认证比对，功能设置，授权激活
  */
 public class MainActivity extends BaseActivity implements View.OnClickListener {
+
+    private static boolean open_socket = false;
 
     private Context mContext;
 
@@ -34,8 +43,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Boolean isInitConfig;
     private Boolean isConfigExit;
 
-
     private Button btnBase1, btnBase2, btnBaseFile;
+
+    private static SocketUtils socketutil;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +99,90 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnBase1.setOnClickListener(this);
         btnBase2.setOnClickListener(this);
         btnBaseFile.setOnClickListener(this);
+
+        if(socketutil==null && open_socket) {
+            Log.e("Main", "========================================================================================");
+            socketutil = new SocketUtils(handler);
+            socketutil.start();
+            if(socketutil.isConnected()) {
+                Toast.makeText(MainActivity.this, "连接服务器成功", Toast.LENGTH_LONG).show();
+                //更新数据
+                //PlatformUtils.getInstance().UpdateData();
+            }
+        }
+
+        //testjson
+        /*
+        Map<String, Object> map = jsonToMap(strjs);
+        //这里最好写一个循环输出map的方法 ，我这是偷懒的写法
+        for(Map.Entry<String, Object> entry : map.entrySet()){
+            Log.e("JSON",entry.getKey() + "|||" +entry.getValue());
+        }
+        switch (map.get("operateType").toString())
+        {
+            case "1:n":
+                String calresultid = map.get("calresultid").toString();
+                String picturegroup = map.get("picturegroup").toString();
+                Map<String, Object> innerObject = (Map<String, Object>) map.get("picturedata");
+                String data = innerObject.get("data").toString();
+                String facepictureid = innerObject.get("facepictureid").toString();
+                Log.e("JSON","calresultid = "+ calresultid);
+                Log.e("JSON","picturegroup = "+ picturegroup);
+                Log.e("JSON","data = "+ data);
+                Log.e("JSON","facepictureid = "+ facepictureid);
+                break;
+                case "666":
+                    break;
+        }
+        //*/
     }
+
+    // handler对象，用来接收消息~
+    private static String strjs = "{\"picturedata\":{\"facepictureid\":\"1250783408485158912\",\"data\":\"66666\"},\"calresultid\":\"test\",\"operateType\":\"1:n\",\"picturegroup\":{}}";
+    private static Handler handler = new Handler() {
+        @Override
+        public void handleMessage(android.os.Message msg) {  //这个是发送过来的消息
+            // 处理从子线程发送过来的消息
+            //int arg1 = msg.arg1;  //获取消息携带的属性值
+            //int arg2 = msg.arg2;
+            int what = msg.what;
+            Object result = msg.obj;
+            //Log.e("-what--->>" , ""+what);
+            //Log.e("-result--->>" , "" + result);
+            if ("hhh".equals(result)) return;
+            //Bundle bundle = msg.getData(); // 用来获取消息里面的bundle数据
+            //System.out.println("-getData--->>" + bundle.getStringArray("strs").length);
+
+
+            Map<String, Object> map = TransformUtils.jsonToMap(result.toString());
+            if (map.get("operateType").toString() == null)
+            {
+                Log.e("Handler","ERROR operateType");
+            }
+            //for(Map.Entry<String, Object> entry : map.entrySet()) Log.e("JSON",entry.getKey() + "|||" +entry.getValue());
+            switch (map.get("operateType").toString())
+            {
+                case "1:n":
+                    String calresultid = map.get("calresultid").toString();
+                    String picturegroup = map.get("picturegroup").toString();
+                    Map<String, Object> innerObject = (Map<String, Object>) map.get("picturedata");
+                    String data = innerObject.get("data").toString();
+                    String facepictureid = innerObject.get("facepictureid").toString();
+                    Log.e("JSON","calresultid = "+ calresultid);
+                    Log.e("JSON","picturegroup = "+ picturegroup);
+                    //Log.e("JSON","data = "+ data);
+                    Log.e("JSON","facepictureid = "+ facepictureid);
+                    Bitmap bitmap = TransformUtils.StrToBitmap(data);
+                    FileUtils.saveBitmap(new File(FileUtils.getSDRootFile().getPath()+"/ademo/duck.jpg"), bitmap);
+                    break;
+                case "666":
+                    break;
+                    default:
+                        Log.e("Handle","Unknown handle " + map.get("operateType").toString());
+            }
+        };
+    };
+
 
     /**
      * 启动应用程序，如果之前初始过，自动初始化鉴权和模型（可以添加到Application 中）

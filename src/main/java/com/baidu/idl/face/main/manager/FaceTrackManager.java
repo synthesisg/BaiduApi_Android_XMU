@@ -1,8 +1,10 @@
 package com.baidu.idl.face.main.manager;
 
+import android.util.Log;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.callback.FaceDetectCallBack;
 import com.baidu.idl.face.main.model.LivenessModel;
+import com.baidu.idl.face.main.utils.TransformUtils;
 import com.baidu.idl.main.facesdk.FaceInfo;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
 import com.baidu.idl.main.facesdk.model.BDFaceOcclusion;
@@ -103,10 +105,12 @@ public class FaceTrackManager {
                 BDFaceSDKCommon.BDFaceImageType.BDFACE_IMAGE_TYPE_YUV_420,
                 SingleBaseConfig.getBaseConfig().getDetectDirection(),
                 SingleBaseConfig.getBaseConfig().getMirrorRGB());
+
         livenessModel.setBdFaceImageInstance(rgbInstance);
         long startTime = System.currentTimeMillis();
         FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect()
                 .track(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
+
         livenessModel.setRgbDetectDuration(System.currentTimeMillis() - startTime);
         // getImage() 获取送检图片
         livenessModel.setBdFaceImageInstance(rgbInstance.getImage());

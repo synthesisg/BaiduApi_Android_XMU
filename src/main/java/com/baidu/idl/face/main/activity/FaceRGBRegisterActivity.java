@@ -425,7 +425,7 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                 //*
                 //======================================================================上传服务器================================
                     List<User> lists = FaceApi.getInstance().getUserListByUserName(groupId,username);
-                    PlatformUtils.getInstance().addUser(lists[0]);
+                    PlatformUtils.getInstance().addUser(lists.get(0));
                 //*/
 
 

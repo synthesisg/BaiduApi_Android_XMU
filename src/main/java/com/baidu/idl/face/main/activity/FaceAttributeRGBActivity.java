@@ -26,6 +26,7 @@ import com.baidu.idl.face.main.model.LivenessModel;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.utils.BitmapUtils;
 import com.baidu.idl.face.main.utils.FaceOnDrawTexturViewUtil;
+import com.baidu.idl.face.main.utils.TransformUtils;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.FaceInfo;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;

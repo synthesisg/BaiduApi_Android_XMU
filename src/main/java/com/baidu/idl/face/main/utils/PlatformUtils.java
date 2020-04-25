@@ -5,20 +5,17 @@ import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.model.User;
 import com.baidu.idl.face.main.model.uuid_utime;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
 import android.util.Pair;
-import android.util.Base64;
 
 public class PlatformUtils {
     private static PlatformUtils instance;
     private static boolean isLogin=false;
     private static User user=null;
     /*
-    * conn...
+    * 主要为与平台端相关的数据库交互。
+    *  更新后还需拉取图片。
     * */
 
     private PlatformUtils()
@@ -134,8 +131,7 @@ public class PlatformUtils {
         ret.put("user_name",_user.getUserName());
         ret.put("group_id",_user.getGroupId());
         ret.put("user_info",_user.getUserInfo());
-        ret.put("feature", Base64.encodeToString(_user.getFeature(), Base64.DEFAULT));
-        //String str2 = new String(Base64.decode(strBase64.getBytes(), Base64.DEFAULT));
+        ret.put("feature", TransformUtils.Byte2Str(_user.getFeature()));
         ret.put("image_name",_user.getImageName());
         //ret.put("face_token",_user.getFaceToken());
         ret.put("update_time",""+_user.getUpdateTime());

@@ -127,7 +127,7 @@ public class BaseConfig {
     private int mirrorNIR = 1;
 
     // 是否开启属性检测
-    private boolean attribute = false;
+    private boolean attribute = true;
 
     // rgb和nir摄像头宽
     private int rgbAndNirWidth = 640;
