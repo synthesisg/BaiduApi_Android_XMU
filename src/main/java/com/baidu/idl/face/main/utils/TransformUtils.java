@@ -78,41 +78,6 @@ public class TransformUtils {
         return result;
     }
 
-    public static Map<String, Object> jsonToMap(String content) {
-        content = content.trim();
-        Map<String, Object> result = new HashMap<>();
-        try {
-            if (content.charAt(0) == '[') {
-                JSONArray jsonArray = new JSONArray(content);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    Object value = jsonArray.get(i);
-                    if (value instanceof JSONArray || value instanceof JSONObject) {
-                        result.put(i + "", jsonToMap(value.toString().trim()));
-                    } else {
-                        result.put(i + "", jsonArray.getString(i));
-                    }
-                }
-            } else if (content.charAt(0) == '{'){
-                JSONObject jsonObject = new JSONObject(content);
-                Iterator<String> iterator = jsonObject.keys();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    Object value = jsonObject.get(key);
-                    if (value instanceof JSONArray || value instanceof JSONObject) {
-                        result.put(key, jsonToMap(value.toString().trim()));
-                    } else {
-                        result.put(key, value.toString().trim());
-                    }
-                }
-            }else {
-                Log.e("异常", "json2Map: 字符串格式错误");
-            }
-        } catch (JSONException e) {
-            Log.e("异常", "json2Map: ", e);
-            result = null;
-        }
-        return result;
-    }
 
     public static byte[] BitmaptoYUV(Bitmap bitmap)
     {
@@ -195,7 +160,7 @@ public class TransformUtils {
     }
 
     //属性检测
-    public static String Bitmap2Msg(Bitmap bitmap)
+    public static FaceInfo Bitmap2Msg(Bitmap bitmap)
     {
         String msg = "";
         SingleBaseConfig.getBaseConfig().setAttribute(true);
@@ -204,13 +169,14 @@ public class TransformUtils {
 
         BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
         FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect().track(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
-        if (faceInfos == null || faceInfos.length==0) return "未检测到人脸";
+        if (faceInfos == null || faceInfos.length==0) return null;//"未检测到人脸";
         msg = TransformUtils.Faceinfo2Msg(faceInfos[0]);
         Log.e("TransformUtils","TTT, len = "+faceInfos.length+",msg = " + msg);
-        return msg;
+        return faceInfos[0];
     }
 
     public static FaceInfo Bitmap2Faceinfo(Bitmap bitmap) {
+        if (bitmap == null) return null;
         BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
         FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect()
                 .detect(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
@@ -224,50 +190,47 @@ public class TransformUtils {
         if (faceInfo == null ) return null;
         StringBuilder msg = new StringBuilder();
         msg.append(faceInfo.age);
-        msg.append(",").append(faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_NEUTRAL ?
-                "中性表情"
-                : faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_BIG_SMILE ? "大笑"
-                : faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_SMILE ? "微笑" : "没有表情");
-        msg.append(",").append(faceInfo.gender == BDFaceSDKCommon.BDFaceGender.BDFACE_GENDER_FEMALE ? "女性" :
-                faceInfo.gender == BDFaceSDKCommon.BDFaceGender.BDFACE_GENDER_MALE ? "男性" : "婴儿");
-        msg.append(",").append(faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_NO_GLASSES ? "无眼镜"
-                : faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_GLASSES ? "有眼镜"
-                : faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_SUN_GLASSES ? "墨镜" : "太阳镜");
-        msg.append(",").append(faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_YELLOW ? "黄种人"
-                : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_WHITE ? "白种人"
-                : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_BLACK ? "黑种人"
-                : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_INDIAN ? "印度人"
-                : "地球人");
+        msg.append(",").append(faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_NEUTRAL ? "neutral"
+                : faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_BIG_SMILE ? "laugh"
+                : faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_SMILE ? "smile" : "no");
+        msg.append(",").append(faceInfo.gender == BDFaceSDKCommon.BDFaceGender.BDFACE_GENDER_FEMALE ? "female" :
+                faceInfo.gender == BDFaceSDKCommon.BDFaceGender.BDFACE_GENDER_MALE ? "male" : "baby");
+        msg.append(",").append(faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_NO_GLASSES ? "no"
+                : faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_GLASSES ? "yes"
+                : faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_SUN_GLASSES ? "sunglasses" : "sunglasses");
+        msg.append(",").append(faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_YELLOW ? "yellow"
+                : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_WHITE ? "white"
+                : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_BLACK ? "black"
+                : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_INDIAN ? "indian" : "human");
         return msg.toString();
     }
     //人脸识别
     public static Pair<Boolean,byte[]> Bitmap2Feature(Bitmap bitmap) throws UnsupportedEncodingException {
-        BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
-        FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect()
-                .detect(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
+            BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
+            FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect()
+                    .detect(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
 
-        byte[] feature = new byte[512];
-        if (faceInfos != null && faceInfos.length > 0) {
-            // 判断质量检测，针对模糊度、遮挡、角度
-            Pair<Boolean,String> pair = qualityCheck(faceInfos[0]);
+            byte[] feature = new byte[512];
+            if (faceInfos != null && faceInfos.length > 0) {
+                // 判断质量检测，针对模糊度、遮挡、角度
+                Pair<Boolean, String> pair = qualityCheck(faceInfos[0]);
 
-            float ret = -1;
-            if (pair.first) {
-                ret = FaceSDKManager.getInstance().getFaceFeature().feature(BDFaceSDKCommon.FeatureType.
-                        BDFACE_FEATURE_TYPE_ID_PHOTO, rgbInstance, faceInfos[0].landmarks, feature);
-                Log.i("qing", "ret:" + ret);
-                if (ret == 128) {
-                    return new Pair<>(true,feature);
+                float ret = -1;
+                if (pair.first) {
+                    ret = FaceSDKManager.getInstance().getFaceFeature().feature(BDFaceSDKCommon.FeatureType.
+                            BDFACE_FEATURE_TYPE_ID_PHOTO, rgbInstance, faceInfos[0].landmarks, feature);
+                    Log.i("qing", "ret:" + ret);
+                    if (ret == 128) {
+                        return new Pair<>(true, feature);
+                    } else {
+                        return new Pair<>(false, "未完成人脸比对，可能原因，人脸太小（小于sdk初始化设置的最小检测人脸），人脸不是朝上，sdk不能检测出人脸".getBytes("utf-8"));
+                    }
                 } else {
-                    return new Pair<>(false,"未完成人脸比对，可能原因，人脸太小（小于sdk初始化设置的最小检测人脸），人脸不是朝上，sdk不能检测出人脸".getBytes("utf-8"));
+                    return new Pair<>(false, pair.second.getBytes("utf-8"));
                 }
+            } else {
+                return new Pair<>(false, "未检测到人脸,可能原因人脸太小".getBytes("utf-8"));
             }
-            else {
-                return new Pair<>(false,pair.second.getBytes("utf-8"));
-            }
-        } else {
-            return new Pair<>(false,"未检测到人脸,可能原因人脸太小".getBytes("utf-8"));
-        }
     }
 
     //魔改自FaceIdCompareActivity

@@ -46,10 +46,11 @@ public class FileUtils {
     /**
      * 写入TXT文件
      */
-    public static boolean writeTxtFile(String content, String filePath) {
+    public static boolean writeTxtFile(String content, String filePath) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
-            return false;
+            //return false;
+            file.createNewFile();
         }
 
         boolean flag = false;

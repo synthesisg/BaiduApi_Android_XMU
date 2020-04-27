@@ -3,6 +3,7 @@ package com.baidu.idl.face.main.utils;
 import android.util.Log;
 import android.util.Pair;
 import com.baidu.idl.face.main.activity.FileDownloadActivity;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -67,7 +68,7 @@ public class NetworkUtils {
         }
         return new Pair<>(-1, null);
     }
-    public static Pair<Integer, String> conn_post(String _url, Map<String, String> map)
+    public static Pair<Integer, String> conn_post(String _url, Map<String, String> map, String method)
     {
         Log.e("CONN","URL = "+ _url);
         try {
@@ -81,7 +82,7 @@ public class NetworkUtils {
             connection.setConnectTimeout(3000);
 
             // 写入数据
-            if(map!=null && map.isEmpty()==false) {
+            if(map!=null && map.isEmpty()==false && "JSON".equals(method) == false) {
                 connection.setDoOutput(true);
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                 StringBuffer sBuffer = new StringBuffer();
@@ -94,10 +95,19 @@ public class NetworkUtils {
                 out.flush();
                 out.close();
             }
-            else
-            {
-                connection.setDoOutput(false);
-            }
+            else if ("JSON".equals(method))
+                {
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty("Content-type","application/json;charset=UTF-8");
+                    //connection.setRequestProperty("Charset","UTF-8");
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    Log.e("CONN_POST", "Buffer = " + map.get("json"));
+                    out.writeBytes(map.get("json"));
+                    out.flush();
+                    out.close();
+                }
+                else
+                    connection.setDoOutput(false);
 
             connection.connect();
             int code = connection.getResponseCode();
@@ -158,15 +168,21 @@ public class NetworkUtils {
 
     public static class DLThread extends Thread {
         private FileDownloadActivity.dat item;
+        public boolean done = false;
 
         public DLThread(FileDownloadActivity.dat _item) {
-            item=_item;
+            item = _item;
+            Log.e("DLThread","Create , url = " + item.url);
+        }
+        public DLThread(String _name, String _url) {
+            item = new FileDownloadActivity.dat(_name,_url);
             Log.e("DLThread","Create , url = " + item.url);
         }
 
         public void run() {
             Log.e("DLThread","Begin , path = "+ FileUtils.getSDRootFile().getPath()+"/ademo" + ", url = " + item.url);
             NetworkUtils.downlaodFile(item.url,FileUtils.getSDRootFile().getPath()+"/ademo",item.name);
+            done = true;
             Log.e("DLThread","End .");
         }
     }
@@ -176,27 +192,42 @@ public class NetworkUtils {
         private int code=0;
         private String url,method;
         private Map<String, String> map;
+        private JSONObject json;
 
-        public MSGThread(String _url, Map<String, String> _map, String method)
+        public MSGThread(String _url, Map<String, String> _map, String _method)
         {
-            url=_url;
-            map=_map;
+            url = URL_h + _url;
+            map = _map;
+            json = null;
+            method = _method;
+        }
+        public MSGThread(String _url, JSONObject _json)
+        {
+            url = URL_h + _url;
+            map = null;
+            json = _json;
+            method = "JSON";
         }
         public void run()
         {
             Log.e("MSGThread" , "Run");
-            Pair<Integer, String> pair = null;
-            //*
+            Pair<Integer, String> pair = new Pair<>(-1,"");
+            /*
             pair = NetworkUtils.testimpl();
             //*/
-            /*
+            //*
             if ("GET".equals(method))
             {
-                pair = PlatformUtils.conn_get(url,map);
+                pair = NetworkUtils.conn_get(url,map);
             }
             if("POST".equals(method))
             {
-                pair = PlatformUtils.conn_post(url,map);
+                pair = NetworkUtils.conn_post(url,map,"POST");
+            }
+            if("JSON".equals(method)) {
+                Map<String,String> js = new HashMap<>();
+                js.put("json",json.toString());
+                pair = NetworkUtils.conn_post(url, js, "JSON");
             }
             //*/
             code = pair.first;

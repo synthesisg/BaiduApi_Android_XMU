@@ -7,31 +7,37 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.db.DBManager;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
+import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.utils.*;
 import com.baidu.idl.face.main.listener.SdkInitListener;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.facesdkdemo.R;
+import com.baidu.idl.main.facesdk.FaceInfo;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 
 /**
  * 主功能页面，包含人脸检索入口，认证比对，功能设置，授权激活
  */
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
-    private static boolean open_socket = false;
+    private static boolean open_socket = true;
 
     private Context mContext;
 
@@ -64,7 +70,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
         mContext = this;
-        initView();
+        try {
+            initView();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         initLicense();
     }
 
@@ -78,7 +88,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     /**
      * UI 相关VIEW 初始化
      */
-    private void initView() {
+    private void initView() throws JSONException {
         btnSearch = findViewById(R.id.btn_search);
         btnIdentity = findViewById(R.id.btn_identity);
         btnAttribute = findViewById(R.id.btn_attribute);
@@ -118,16 +128,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         for(Map.Entry<String, Object> entry : map.entrySet()){
             Log.e("JSON",entry.getKey() + "|||" +entry.getValue());
         }
+        Map<String, Object> arr = (Map<String, Object>) map.get("picturegroup");
+        Log.e("JSON-",""+arr);
+        for(Map.Entry<String, Object> entry : arr.entrySet()){
+            Log.e("JSON--",entry.getKey() + "|||" + entry.getValue());
+            Map<String, Object> arr2 = (Map<String, Object>) entry.getValue();
+            for(Map.Entry<String, Object> entry2 : arr2.entrySet()){
+                Log.e("JSON-",entry2.getKey() + "|||" +entry2.getValue());
+            }
+        }
         switch (map.get("operateType").toString())
         {
             case "1:n":
                 String calresultid = map.get("calresultid").toString();
-                String picturegroup = map.get("picturegroup").toString();
+                //JSONArray picturegroup = new JSONArray( map.get("picturegroup").toString());
                 Map<String, Object> innerObject = (Map<String, Object>) map.get("picturedata");
                 String data = innerObject.get("data").toString();
                 String facepictureid = innerObject.get("facepictureid").toString();
                 Log.e("JSON","calresultid = "+ calresultid);
-                Log.e("JSON","picturegroup = "+ picturegroup);
+                //Log.e("JSON","picturegroup = "+ picturegroup.length());
                 Log.e("JSON","data = "+ data);
                 Log.e("JSON","facepictureid = "+ facepictureid);
                 break;
@@ -135,10 +154,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     break;
         }
         //*/
+
+        //hashmap to json
+        /*
+		JSONObject allJson = new JSONObject();
+		allJson.put("t1","a1");
+		allJson.put("t2",666);
+        JSONObject cdx = new JSONObject();
+		cdx.put("inner1","i1");
+        cdx.put("inner2",2);
+        allJson.put("Map",cdx);
+        List<Integer> lists = new ArrayList<>();
+        lists.add(10);
+        lists.add(20);
+        lists.add(30);
+        allJson.put("List",lists);
+		Log.e("JsonStr",allJson.toString());
+        //*/
     }
 
     // handler对象，用来接收消息~
-    private static String strjs = "{\"picturedata\":{\"facepictureid\":\"1250783408485158912\",\"data\":\"66666\"},\"calresultid\":\"test\",\"operateType\":\"1:n\",\"picturegroup\":{}}";
+    private static String strjs = "{\"picturedata\":{\"facepictureid\":\"1250783408485158912\",\"data\":\"66666\"},\"calresultid\":\"test\",\"operateType\":\"1:n\",\"picturegroup\":[{\"facepictureid\": \"1\",\"data\": \"base64encode2\"}, {\"facepictureid\": \"2\",\"data\": \"base64encode3\"}]}";
     private static Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {  //这个是发送过来的消息
@@ -147,6 +183,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             //int arg2 = msg.arg2;
             int what = msg.what;
             Object result = msg.obj;
+            /* save json
+            Log.e("Save",FileUtils.getSDRootFile().getPath()+"/ademo/aJson.txt");
+            try {
+                FileUtils.writeTxtFile(result.toString(),FileUtils.getSDRootFile().getPath()+"/ademo/aJson.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //*/
             //Log.e("-what--->>" , ""+what);
             //Log.e("-result--->>" , "" + result);
             if ("hhh".equals(result)) return;
@@ -154,31 +198,259 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             //System.out.println("-getData--->>" + bundle.getStringArray("strs").length);
 
 
-            Map<String, Object> map = TransformUtils.jsonToMap(result.toString());
-            if (map.get("operateType").toString() == null)
+            Map<String, Object> map = JsonUtils.jsonToMap(result.toString());
+            JSONObject allJson = new JSONObject();
+            if (map.get("operateType").toString() == null || map.get("calresultid").toString() == null)
             {
                 Log.e("Handler","ERROR operateType");
             }
             //for(Map.Entry<String, Object> entry : map.entrySet()) Log.e("JSON",entry.getKey() + "|||" +entry.getValue());
-            switch (map.get("operateType").toString())
-            {
-                case "1:n":
-                    String calresultid = map.get("calresultid").toString();
-                    String picturegroup = map.get("picturegroup").toString();
-                    Map<String, Object> innerObject = (Map<String, Object>) map.get("picturedata");
-                    String data = innerObject.get("data").toString();
-                    String facepictureid = innerObject.get("facepictureid").toString();
-                    Log.e("JSON","calresultid = "+ calresultid);
-                    Log.e("JSON","picturegroup = "+ picturegroup);
-                    //Log.e("JSON","data = "+ data);
-                    Log.e("JSON","facepictureid = "+ facepictureid);
-                    Bitmap bitmap = TransformUtils.StrToBitmap(data);
-                    FileUtils.saveBitmap(new File(FileUtils.getSDRootFile().getPath()+"/ademo/duck.jpg"), bitmap);
-                    break;
-                case "666":
-                    break;
+
+            String calresultid = map.get("calresultid").toString();
+            String operateType = map.get("operateType").toString();
+
+            Log.e("JSON", "calresultid = " + calresultid);
+            try {
+                Map<String,String>ret_msg = new HashMap<>();
+                String url = null;
+                Map<String, Object> innerObject = null;
+                String data = null;
+                String facepictureid = null;
+                Bitmap bitmap = null;
+                if (map.get("picturedata") != null) {
+                    innerObject = (Map<String, Object>) map.get("picturedata");
+                    data = innerObject.get("data").toString();
+                    facepictureid = innerObject.get("facepictureid").toString();
+                    bitmap = TransformUtils.StrToBitmap(data);
+                    ret_msg.put("facepictureid" , facepictureid);
+                    allJson.put("facepictureid" , facepictureid);
+                }
+                ret_msg.put("calresultid" , calresultid);
+                ret_msg.put("result","fail");
+
+                allJson.put("calresultid" , calresultid);
+                allJson.put("result","fail");
+
+                switch (operateType) {
+                    //1:n
+                    case "1:n":{
+                        url = "send/1comparen";
+                        ret_msg.put("operatetype" , "1:N");
+                        allJson.put("operatetype" , "1:N");
+
+                        Pair<Boolean,byte[]> ret_1 = TransformUtils.Bitmap2Feature(bitmap);
+
+                        if(ret_1.first)
+                        {
+                            Map<String, Object> arr = (Map<String, Object>) map.get("picturegroup");
+                            for(Map.Entry<String, Object> entry : arr.entrySet()){
+                                Map<String, Object> arr2 = (Map<String, Object>) entry.getValue();
+                                for(Map.Entry<String, Object> entry2 : arr2.entrySet()){
+                                    Log.e("JSON--Inner",entry2.getKey());
+                                    Bitmap bitmap_n = TransformUtils.StrToBitmap(entry2.getValue().toString());
+                                    Pair<Boolean,byte[]> ret_n = TransformUtils.Bitmap2Feature(bitmap_n);
+                                    if(ret_n.first)
+                                    {
+                                        float score = TransformUtils.Compare(ret_1.second,ret_n.second);
+                                        if (score > SingleBaseConfig.getBaseConfig().getThreshold())
+                                        {
+                                            ret_msg.put("result","success");
+                                            ret_msg.put("resultpictureid" , entry2.getKey());
+                                            allJson.put("result","success");
+                                            allJson.put("resultpictureid" , entry2.getKey());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;}
+
+                    //公安验证
+                    case "public_security_verification":{
+                        url = "send/public_security_verification";
+                        ret_msg.put("operatetype" , "public_security_verification");
+                        allJson.put("operatetype" , "public_security_verification");
+
+                        Map<String, Object> innerObject_psv = (Map<String, Object>) map.get("public_security_verificationData");
+                        String data_psv = innerObject_psv.get("data").toString();
+                        String facepictureid_psv = innerObject_psv.get("public_security_verificationID").toString();
+
+                        ret_msg.put("resultpictureid" , facepictureid_psv);
+                        allJson.put("resultpictureid" , facepictureid_psv);
+
+                        Pair<Boolean,byte[]> ret_1 = TransformUtils.Bitmap2Feature(bitmap);
+                        Bitmap bitmap_psv = TransformUtils.StrToBitmap(data_psv);
+                        Pair<Boolean,byte[]> ret_psv = TransformUtils.Bitmap2Feature(bitmap_psv);
+
+                        if(ret_1.first && ret_psv.first && TransformUtils.Compare(ret_1.second,ret_psv.second)> SingleBaseConfig.getBaseConfig().getThreshold()) {
+                            ret_msg.put("result", "success");
+                            allJson.put("result", "success");
+                        }
+                        break;}
+
+                    //活体检测
+                    case "biopsy":{
+                        url = "send/biopsy";
+                        ret_msg.put("operatetype" , "biopsy");
+                        ret_msg.put("context" , "notlive");
+                        allJson.put("operatetype" , "biopsy");
+                        allJson.put("context" , "notlive");
+
+                        float score = TransformUtils.liveness(bitmap);
+                        if (score > SingleBaseConfig.getBaseConfig().getRgbLiveScore()) {
+                            ret_msg.put("context", "living");
+                            allJson.put("context", "living");
+                        }
+                        break;}
+
+                    //人脸属性测试
+                    case "facecharactercheck":{
+                        url = "send/facecharactercheck";
+                        ret_msg.put("operatetype" , "facecharactercheck");
+                        allJson.put("operatetype" , "facecharactercheck");
+
+                        FaceInfo faceinfo = TransformUtils.Bitmap2Msg(bitmap);
+                        Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(bitmap);
+                        if (faceinfo != null)
+                        {
+                            ret_msg.put("centerX" , faceinfo.centerX + "");
+                            ret_msg.put("centerY" , faceinfo.centerY + "");
+                            ret_msg.put("width" , faceinfo.width + "");
+                            ret_msg.put("height" , faceinfo.height + "");
+                            ret_msg.put("angle" , faceinfo.angle + "");
+                            ret_msg.put("score" , faceinfo.score + "");
+                            ret_msg.put("yaw" , faceinfo.yaw + "");
+                            ret_msg.put("roll" , faceinfo.roll + "");
+                            ret_msg.put("pitch" , faceinfo.pitch + "");
+                            ret_msg.put("bluriness" , faceinfo.bluriness + "");
+                            ret_msg.put("illum" , faceinfo.illum + "");
+                            ret_msg.put("mouthclose" , faceinfo.mouthclose + "");
+                            ret_msg.put("leftEyeclose" , faceinfo.leftEyeclose + "");
+                            ret_msg.put("rightEyeclose" , faceinfo.rightEyeclose + "");
+                            ret_msg.put("occlusion" , faceinfo.occlusion + "");
+
+                            //年龄 表情 行吧 眼镜 人种
+                            String face_msg = TransformUtils.Faceinfo2Msg(faceinfo);
+                            String[] args = face_msg.split(",");
+
+                            ret_msg.put("age" , args[0]);
+                            ret_msg.put("expression" , args[1]);
+                            ret_msg.put("gender" , args[2]);
+                            ret_msg.put("glasses" , args[3]);
+                            ret_msg.put("race" , args[4]);
+
+                            JSONObject info = new JSONObject();
+                            info.put("centerx" , faceinfo.centerX);
+                            info.put("centery" , faceinfo.centerY);
+                            info.put("width" , faceinfo.width);
+                            info.put("height" , faceinfo.height);
+                            info.put("angle" , faceinfo.angle);
+                            info.put("score" , faceinfo.score);
+                            info.put("yaw" , faceinfo.yaw);
+                            info.put("roll" , faceinfo.roll);
+                            info.put("pitch" , faceinfo.pitch);
+                            info.put("bluriness" , faceinfo.bluriness);
+                            info.put("illum" , faceinfo.illum + "");
+                            info.put("mouthclose" , faceinfo.mouthclose);
+                            info.put("lefteyeclose" , faceinfo.leftEyeclose);
+                            info.put("righteyeclose" , faceinfo.rightEyeclose );
+                            info.put("occlusion" , faceinfo.occlusion + "");
+
+                            info.put("age" , Integer.parseInt(args[0]));
+                            info.put("expression" , args[1]);
+                            info.put("race" , args[2]);
+                            info.put("glasses" , args[3]);
+                            info.put("gender" ,  args[4]);
+                            allJson.put("faceinfo",info);
+
+                            allJson.put("age" , Integer.parseInt(args[0]));
+                            allJson.put("expression" , args[1]);
+                            allJson.put("race" , args[2]);
+                            allJson.put("glasses" , args[3]);
+                            allJson.put("gender" ,  args[4]);
+
+                            if (feature.first) {
+                                ret_msg.put("feature", TransformUtils.Byte2Str(feature.second));
+                                allJson.put("feature", TransformUtils.Byte2Str(feature.second));
+                            }
+                            ret_msg.put("result" , "success");
+                            allJson.put("result" , "success");
+                        }
+                        break;}
+                    //视频流人脸检测
+                    case "videofacecheck":{
+                        url = "send/videofacecheck";
+                        ret_msg.put("operatetype" , "videofacecheck");
+                        allJson.put("operatetype" , "videofacecheck");
+
+                        String uri = map.get("video_url").toString();
+                        Log.e("Video","Begin DL.");
+                        Thread thread = new NetworkUtils.DLThread("666.mp4",NetworkUtils.URL_h + uri);
+                        thread.start();
+                        //while (((NetworkUtils.DLThread) thread).done == false) wait(3000);
+                        thread.join();
+                        Log.e("Video","End DL.");
+
+                        MediaUtils media = new MediaUtils(FileUtils.getSDRootFile().getPath()+"/ademo/" + "666.mp4");
+                        List<Bitmap> lists = media.getAllFrame();
+                        Log.e("Video","End Extract.");
+
+
+                        ret_msg.put("checkresult" , "matchfail");
+                        ret_msg.put("uri" , uri);
+                        ret_msg.put("resultfaceinfoid" , "");
+                        allJson.put("checkresult" , "matchfail");
+                        allJson.put("uri" , uri);
+                        allJson.put("resultfaceinfoid" , "");
+                        break;}
+                    //人脸更新
+                    case "faceinfoupdate":{
+                        url = "send/faceinfoupdate";
+                        ret_msg.put("operatetype" , "faceinfoUpdate");
+                        ret_msg.put("faceinfoid" , map.get("faceinfoid").toString());
+                        allJson.put("operatetype" , "faceinfoUpdate");
+                        allJson.put("faceinfoid" , map.get("faceinfoid").toString());
+
+                        Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(bitmap);
+                        if (feature.first) {
+                            ret_msg.put("feature", TransformUtils.Byte2Str(feature.second) + "");
+                            ret_msg.put("result", "success");
+                            allJson.put("feature", TransformUtils.Byte2Str(feature.second) + "");
+                            allJson.put("result", "success");
+                        }
+                        break;}
+                    //人脸增加
+                    case "faceinfoadd":{
+                        url = "send/faceinfoadd";
+                        ret_msg.put("operatetype" , "faceinfoAdd");
+                        ret_msg.put("faceinfoid" , map.get("faceinfoid").toString());
+                        allJson.put("operatetype" , "faceinfoAdd");
+                        allJson.put("faceinfoid" , map.get("faceinfoid").toString());
+
+                        Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(bitmap);
+                        if (feature.first) {
+                            ret_msg.put("feature", TransformUtils.Byte2Str(feature.second) + "");
+                            ret_msg.put("result", "success");
+                            allJson.put("feature", TransformUtils.Byte2Str(feature.second) + "");
+                            allJson.put("result", "success");
+                        }
+                        break;}
                     default:
-                        Log.e("Handle","Unknown handle " + map.get("operateType").toString());
+                        Log.e("Handle", "Unknown handle " + map.get("operateType").toString());
+                }
+                if (url != null) {
+                    ret_msg.put("finishtime" , "" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+                    //allJson.put("finishtime" , "" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+                    //hashmap to json
+                    Log.e("Send JSON","Json = " +allJson.toString());
+                    Thread thread =  new NetworkUtils.MSGThread(url, allJson);
+                    thread.start();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.e("Handler","" + e);
             }
         };
     };
@@ -283,5 +555,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 startActivity(new Intent(MainActivity.this, BaseFileActivity.class));  //FaceRGBOpenDebugSearchActivity
                 break;
         }
+    }
+
+    public class pic
+    {
+       private String facepictureid;
+
+        public String getFacepictureid() {
+            return facepictureid;
+        }
+
+        public void setFacepictureid(String facepictureid) {
+            this.facepictureid = facepictureid;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        private String data;
     }
 }

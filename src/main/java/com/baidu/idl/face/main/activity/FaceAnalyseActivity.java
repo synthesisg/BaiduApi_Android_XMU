@@ -210,7 +210,8 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
         if (faceInfos != null && faceInfos.length > 0) {
             //* 特征提取测试
             TransformUtils.liveness(bitmap);//score
-            msg = TransformUtils.Bitmap2Msg(bitmap);
+            FaceInfo faceinfo = TransformUtils.Bitmap2Msg(bitmap);
+            msg = TransformUtils.Faceinfo2Msg(faceinfo);
             Log.e("syncFeature","faceInfo = " + msg);
             //*/
             Log.e("syncFeature","faceInfos.length = " + faceInfos.length + " ,landmarks = " + faceInfos[0].landmarks.length);

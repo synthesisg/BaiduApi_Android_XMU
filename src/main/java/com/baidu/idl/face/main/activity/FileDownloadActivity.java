@@ -145,7 +145,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         }catch (Exception ex){}
     }
 
-    public class dat
+    public static class dat
     {
         public String name,url;
         public dat(){}

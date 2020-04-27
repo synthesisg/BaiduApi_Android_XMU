@@ -261,7 +261,7 @@ public class DBManager {
             cv.put("face_token", user.getFaceToken());
             cv.put("feature", user.getFeature());
             cv.put("image_name", user.getImageName());
-            cv.put("ctime", System.currentTimeMillis());
+            cv.put("ctime", System.currentTimeMillis());    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
             cv.put("update_time", System.currentTimeMillis());
 
             long rowId = mDatabase.insert(DBHelper.TABLE_USER, null, cv);
