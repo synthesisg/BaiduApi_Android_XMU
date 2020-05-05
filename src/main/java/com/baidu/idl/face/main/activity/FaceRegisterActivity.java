@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.api.FaceApi;
@@ -41,8 +39,8 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
     private EditText userInfoEt;
 
     private Button autoDetectBtn;
-    private Button settingButton;
-    private Button backBtn;
+    private ImageButton settingButton;
+    private ImageButton backBtn;
 
     private static final int TEXT_LENGTH = 20;
     private static final int USERINFO_LENGTH = 100;
@@ -63,8 +61,8 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
         usernameEt = (EditText) findViewById(R.id.username_et);
         userGroupEt = (EditText) findViewById(R.id.userGroup_et);
         autoDetectBtn = (Button) findViewById(R.id.auto_detect_btn);
-        settingButton = (Button) findViewById(R.id.id_reg_setting);
-        backBtn = (Button) findViewById(R.id.id_reg_back);
+        settingButton = (ImageButton) findViewById(R.id.id_reg_setting);
+        backBtn = (ImageButton) findViewById(R.id.id_reg_back);
         userInfoEt = (EditText) findViewById(R.id.user_info_tx);
 
         autoDetectBtn.setOnClickListener(this);
@@ -83,6 +81,8 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
             userInfoEt.setText(user.getUserInfo());
 
             //UI修改
+            TextView textTitle = findViewById(R.id.tv_title);
+            textTitle.setText("修改信息");
             autoDetectBtn.setText("保存修改");
         }
     }

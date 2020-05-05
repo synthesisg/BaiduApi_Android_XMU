@@ -136,7 +136,15 @@
             android:name="com.baidu.liantian.LiantianProvider"
             android:authorities="com.baidu.idl.face.demo.liantian.ac.provider"
             android:exported="false" />
-
+        <provider
+                android:name="android.support.v4.content.FileProvider"
+                android:authorities="com.baidu.idl.facesdkdemo.fileProvider"
+                android:grantUriPermissions="true"
+                android:exported="false">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/file_paths" />
+        </provider>
         <service
             android:name="com.baidu.liantian.LiantianService"
             android:exported="false">

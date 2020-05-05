@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-    <Button
+    android:layout_height="wrap_content"
+    android:background="#66CCEE">
+    <ImageButton
         android:id="@+id/btn_back"
-        android:layout_width="60dp"
-        android:layout_height="30dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="fitXY"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="15dp"
-        android:background="@drawable/fillet_style_return_selector"
-        android:text="返回"
-        android:textColor="#ffffff" />
+        android:background="@android:color/transparent"
+        android:src="@mipmap/back"/>
 
     <TextView
         android:id="@+id/textView4"
@@ -20,19 +21,19 @@
         android:gravity="center"
         android:text="视频流动态人脸搜索"
         android:textColor="#363636"
-        android:textSize="22dp"
+        android:textSize="28dp"
         android:textStyle="bold" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_setting"
-        android:layout_width="60dp"
-        android:layout_height="30dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="fitXY"
         android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/textView4"
         android:layout_marginEnd="14dp"
-        android:background="@drawable/fillet_style_button_selector"
-        android:text="设置"
-        android:textColor="#ffffff" />
+        android:background="@android:color/transparent"
+        android:src="@mipmap/setting_icon" />
 
     <View
         android:id="@+id/shang_view"

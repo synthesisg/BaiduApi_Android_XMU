@@ -17,11 +17,13 @@ import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.db.DBManager;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
+import com.baidu.idl.face.main.model.User;
 import com.baidu.idl.face.main.utils.*;
 import com.baidu.idl.face.main.listener.SdkInitListener;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.FaceInfo;
+import com.baidu.idl.main.facesdk.statistic.NetWorkUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,7 +53,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private Button btnBase1, btnBase2, btnBaseFile;
 
-    private static SocketUtils socketutil;
+    public static SocketUtils socketutil;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,9 +112,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnBase2.setOnClickListener(this);
         btnBaseFile.setOnClickListener(this);
 
-        if(socketutil==null && open_socket) {
+        socketutil = new SocketUtils(handler);
+        if(socketutil.getstate() == -1 && open_socket) {
             Log.e("Main", "========================================================================================");
-            socketutil = new SocketUtils(handler);
             socketutil.start();
             if(socketutil.isConnected()) {
                 Toast.makeText(MainActivity.this, "连接服务器成功", Toast.LENGTH_LONG).show();
@@ -171,10 +173,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         allJson.put("List",lists);
 		Log.e("JsonStr",allJson.toString());
         //*/
+        //doc
+        /*
+        Thread thread = new NetworkUtils.MSGThread("senddoc",null,"GET");
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String cdx = ((NetworkUtils.MSGThread) thread).getMessage();
+        Map<String, Object> map = JsonUtils.jsonToMap(cdx);
+        Map<String, Object> arr = (Map<String, Object>) map.get("docdata");
+        //这里最好写一个循环输出map的方法 ，我这是偷懒的写法
+        for(Map.Entry<String, Object> entry : arr.entrySet()){
+            //Log.e("JSON--",entry.getKey() + "|||" + entry.getValue());
+            Map<String, Object> arr2 = (Map<String, Object>) entry.getValue();
+            Log.e("JSON-",arr2.get("docname") + "|||" +arr2.get("url"));
+        }
+        //*/
     }
 
     // handler对象，用来接收消息~
     private static String strjs = "{\"picturedata\":{\"facepictureid\":\"1250783408485158912\",\"data\":\"66666\"},\"calresultid\":\"test\",\"operateType\":\"1:n\",\"picturegroup\":[{\"facepictureid\": \"1\",\"data\": \"base64encode2\"}, {\"facepictureid\": \"2\",\"data\": \"base64encode3\"}]}";
+    private static String docjs = "{\"docdata\":[{\"docid\":\"1255066968015532032\",\"url\":\"faceSearch/download?filepath=C:/jeesite/userfiles/fileupload/202004/1252143585762332674.doc;\"},{\"docid\":\"1255067360627552256\",\"url\":\"faceSearch/download?filepath=C:/jeesite/userfiles/fileupload/202004/1255067355170762754.doc;\"},{\"docid\":\"1255067710692552704\",\"url\":\"faceSearch/download?filepath=C:/jeesite\"},{\"docid\":\"1255102427733225472\",\"url\":\"faceSearch/download?filepath=C:/jeesite/userfiles/fileupload/202004/1254731127795511298.png;\"},{\"docid\":\"1256157761143320576\",\"url\":\"faceSearch/download?filepath=C:/jeesite/userfiles/fileupload/202005/1256157725672091650.txt;\"}]}";
     private static Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {  //这个是发送过来的消息
@@ -200,9 +222,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             Map<String, Object> map = JsonUtils.jsonToMap(result.toString());
             JSONObject allJson = new JSONObject();
-            if (map.get("operateType").toString() == null || map.get("calresultid").toString() == null)
+            if (map.get("operateType") == null || map.get("calresultid") == null)
             {
-                Log.e("Handler","ERROR operateType");
+                Log.e("Handler","NULL operateType/calresultid");
+                return;
             }
             //for(Map.Entry<String, Object> entry : map.entrySet()) Log.e("JSON",entry.getKey() + "|||" +entry.getValue());
 
@@ -298,17 +321,42 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         allJson.put("context" , "notlive");
 
                         float score = TransformUtils.liveness(bitmap);
-                        if (score > SingleBaseConfig.getBaseConfig().getRgbLiveScore()) {
+                        if (score*100 > SingleBaseConfig.getBaseConfig().getRgbLiveScore()) {
                             ret_msg.put("context", "living");
                             allJson.put("context", "living");
                         }
                         break;}
 
-                    //人脸属性测试
-                    case "facecharactercheck":{
-                        url = "send/facecharactercheck";
-                        ret_msg.put("operatetype" , "facecharactercheck");
-                        allJson.put("operatetype" , "facecharactercheck");
+                    //人脸属性测试 人脸添加修改
+                    case "facecharactercheck":
+                    case "faceinfoAdd":
+                    case "faceinfoUpdate":{
+
+                        JSONObject info = new JSONObject();
+                        switch (operateType)
+                        {
+                            case "facecharactercheck":
+                                url = "send/facecharactercheck";
+                                ret_msg.put("operatetype" , "facecharactercheck");
+                                allJson.put("operatetype" , "facecharactercheck");
+                                break;
+                            case "faceinfoAdd":
+                                url = "send/faceinfoadd";
+                                ret_msg.put("operatetype" , "faceinfoAdd");
+                                ret_msg.put("faceinfoid" , map.get("faceinfoid").toString());
+                                allJson.put("operatetype" , "faceinfoAdd");
+                                allJson.put("faceinfoid" , map.get("faceinfoid").toString());
+                                info.put("id",map.get("faceinfoid").toString());
+                                break;
+                            case "faceinfoUpdate":
+                                url = "send/faceinfoupdate";
+                                ret_msg.put("operatetype" , "faceinfoUpdate");
+                                ret_msg.put("faceinfoid" , map.get("faceinfoid").toString());
+                                allJson.put("operatetype" , "faceinfoUpdate");
+                                allJson.put("faceinfoid" , map.get("faceinfoid").toString());
+                                info.put("id",map.get("faceinfoid").toString());
+                                break;
+                        }
 
                         FaceInfo faceinfo = TransformUtils.Bitmap2Msg(bitmap);
                         Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(bitmap);
@@ -340,7 +388,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             ret_msg.put("glasses" , args[3]);
                             ret_msg.put("race" , args[4]);
 
-                            JSONObject info = new JSONObject();
                             info.put("centerx" , faceinfo.centerX);
                             info.put("centery" , faceinfo.centerY);
                             info.put("width" , faceinfo.width);
@@ -359,16 +406,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
                             info.put("age" , Integer.parseInt(args[0]));
                             info.put("expression" , args[1]);
-                            info.put("race" , args[2]);
+                            info.put("gender" , args[2]);
                             info.put("glasses" , args[3]);
-                            info.put("gender" ,  args[4]);
+                            info.put("race" ,  args[4]);
                             allJson.put("faceinfo",info);
 
                             allJson.put("age" , Integer.parseInt(args[0]));
                             allJson.put("expression" , args[1]);
-                            allJson.put("race" , args[2]);
+                            allJson.put("gender" , args[2]);
                             allJson.put("glasses" , args[3]);
-                            allJson.put("gender" ,  args[4]);
+                            allJson.put("race" ,  args[4]);
 
                             if (feature.first) {
                                 ret_msg.put("feature", TransformUtils.Byte2Str(feature.second));
@@ -377,63 +424,53 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             ret_msg.put("result" , "success");
                             allJson.put("result" , "success");
                         }
+
+
+                        //* add to local
+                        if ("faceinfoAdd".equals(operateType) && feature.first) {
+                            User newUser = new User();
+                            String uuid = UUID.randomUUID().toString();
+                            String path = "default-"+uuid+".jpg";
+                            newUser.setUserId(uuid);
+                            newUser.setUserName(uuid);
+                            newUser.setGroupId("default");
+                            newUser.setFeature(feature.second);
+                            newUser.setImageName(path);
+                            FaceApi.getInstance().userAdd(newUser);
+                            //保存图片 更新
+                        }
+                        //*/
+
                         break;}
                     //视频流人脸检测
                     case "videofacecheck":{
                         url = "send/videofacecheck";
                         ret_msg.put("operatetype" , "videofacecheck");
                         allJson.put("operatetype" , "videofacecheck");
-
                         String uri = map.get("video_url").toString();
+                        ret_msg.put("uri" , uri);
+                        allJson.put("uri" , uri);
+
+
                         Log.e("Video","Begin DL.");
                         Thread thread = new NetworkUtils.DLThread("666.mp4",NetworkUtils.URL_h + uri);
                         thread.start();
-                        //while (((NetworkUtils.DLThread) thread).done == false) wait(3000);
                         thread.join();
-                        Log.e("Video","End DL.");
+                        Log.e("Video","End DL.Begin Extract at" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
                         MediaUtils media = new MediaUtils(FileUtils.getSDRootFile().getPath()+"/ademo/" + "666.mp4");
-                        List<Bitmap> lists = media.getAllFrame();
-                        Log.e("Video","End Extract.");
+                        List<String> lists = media.autoRun();
+                        Log.e("Video","End Extract at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
+                        //===============================================================doing============================
 
-                        ret_msg.put("checkresult" , "matchfail");
-                        ret_msg.put("uri" , uri);
-                        ret_msg.put("resultfaceinfoid" , "");
-                        allJson.put("checkresult" , "matchfail");
-                        allJson.put("uri" , uri);
-                        allJson.put("resultfaceinfoid" , "");
-                        break;}
-                    //人脸更新
-                    case "faceinfoupdate":{
-                        url = "send/faceinfoupdate";
-                        ret_msg.put("operatetype" , "faceinfoUpdate");
-                        ret_msg.put("faceinfoid" , map.get("faceinfoid").toString());
-                        allJson.put("operatetype" , "faceinfoUpdate");
-                        allJson.put("faceinfoid" , map.get("faceinfoid").toString());
+                        if(lists!= null && lists.size() != 0)
+                        {
+                            ret_msg.put("resultpicture" , lists.get(0));
+                            allJson.put("resultpicture" , lists.get(0));
 
-                        Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(bitmap);
-                        if (feature.first) {
-                            ret_msg.put("feature", TransformUtils.Byte2Str(feature.second) + "");
-                            ret_msg.put("result", "success");
-                            allJson.put("feature", TransformUtils.Byte2Str(feature.second) + "");
-                            allJson.put("result", "success");
-                        }
-                        break;}
-                    //人脸增加
-                    case "faceinfoadd":{
-                        url = "send/faceinfoadd";
-                        ret_msg.put("operatetype" , "faceinfoAdd");
-                        ret_msg.put("faceinfoid" , map.get("faceinfoid").toString());
-                        allJson.put("operatetype" , "faceinfoAdd");
-                        allJson.put("faceinfoid" , map.get("faceinfoid").toString());
-
-                        Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(bitmap);
-                        if (feature.first) {
-                            ret_msg.put("feature", TransformUtils.Byte2Str(feature.second) + "");
-                            ret_msg.put("result", "success");
-                            allJson.put("feature", TransformUtils.Byte2Str(feature.second) + "");
-                            allJson.put("result", "success");
+                            ret_msg.put("result","success");
+                            allJson.put("result","success");
                         }
                         break;}
                     default:
@@ -443,7 +480,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     ret_msg.put("finishtime" , "" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
                     //allJson.put("finishtime" , "" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
                     //hashmap to json
-                    Log.e("Send JSON","Json = " +allJson.toString());
+                    //Log.e("Send JSON","Json = " +allJson.toString());
                     Thread thread =  new NetworkUtils.MSGThread(url, allJson);
                     thread.start();
                 }

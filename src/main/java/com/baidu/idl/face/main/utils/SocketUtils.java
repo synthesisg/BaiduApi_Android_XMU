@@ -1,8 +1,10 @@
 package com.baidu.idl.face.main.utils;
 
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,13 +13,13 @@ import java.net.Socket;
 
 public class SocketUtils extends Thread {
 
-    private String HOST = "192.168.1.8";
+    private String HOST = "192.168.1.9";
     private int PORT = 8081;
-    private Socket socket;
+    private Socket socket = null;
     private Handler handler;
     private BufferedReader bufferedReader = null;
     private OutputStream output = null;
-
+    private int state = -1;
     public SocketUtils(Handler handler){
         Log.e("SocketUtils","socket Build.");
         this.handler = handler;
@@ -31,8 +33,10 @@ public class SocketUtils extends Thread {
                 //socket.setSoTimeout(5000);
                 if (socket.isConnected()) {
                     Log.e("SocketUtils", "Conn Success!");
+                    state = 1;
                 } else {
                     Log.e("SocketUtils", "Conn Fail!");
+                    state = 0;
                 }
                 bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -47,6 +51,7 @@ public class SocketUtils extends Thread {
                 //}
             } catch (Exception e) {
                 Log.e("SocketUtils", "socket catch Exception" + e);
+                state = 0;
                 e.printStackTrace();
                 try {
                     sleep(3000);
@@ -60,5 +65,9 @@ public class SocketUtils extends Thread {
     {
         if (socket == null) return false;
         return socket.isConnected();
+    }
+    public int getstate()
+    {
+        return  state;
     }
 }

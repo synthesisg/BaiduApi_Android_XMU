@@ -17,12 +17,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
@@ -72,8 +67,8 @@ public class FaceRGBIROpenDebugSearchActivity extends BaseActivity implements Vi
     private TextView mTvAllTime;
 
     // 导航栏控件
-    private Button mButReturn;
-    private Button mBtSetting;
+    private ImageButton mButReturn;
+    private ImageButton mBtSetting;
 
 
     // RGB+IR 控件

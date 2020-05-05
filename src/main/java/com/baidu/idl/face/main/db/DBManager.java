@@ -406,11 +406,9 @@ public class DBManager {
      */
     public boolean updateUser(User user) {
         Log.e("DB","Begin updateUser , uuid = "+user.getUserId());
-        boolean success = false;
         if (mDBHelper == null) {
             return false;
         }
-
         try {
             mDatabase = mDBHelper.getWritableDatabase();
             beginTransaction(mDatabase);
@@ -440,12 +438,11 @@ public class DBManager {
                 }
             }
             setTransactionSuccessful(mDatabase);
-            success = true;
-            Log.e("DB","End updateUser true, msg="+user.getUserInfo());
+            Log.e("DB","End updateUser true, msg="+user.getImageName());
         } finally {
             endTransaction(mDatabase);
         }
-        return success;
+        return true;
     }
 
     /**

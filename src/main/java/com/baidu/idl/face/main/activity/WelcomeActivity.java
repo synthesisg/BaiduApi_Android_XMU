@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -81,31 +82,31 @@ public class WelcomeActivity extends BaseActivity implements View.OnClickListene
             Intent intent=null;
             switch (view.getId()) {
                 case R.id.btn_update_base:
-                    LogUtils.d("[base]","btn_update_base");
+                    Log.e("[base]","btn_update_base");
                     intent = new Intent(mContext, FaceRegisterActivity.class);
                     intent.putExtra("page_type", "update_base");
                     startActivity(intent);
                     break;
                 case R.id.btn_update_face:
+                    Log.e("[base]","btn_update_face");
                     intent = new Intent(mContext, FaceRGBRegisterActivity.class);
                     intent.putExtra("page_type", "update_face");
                     startActivity(intent);
-                    LogUtils.d("[base]","btn_update_face");
                     break;
                 case R.id.btn_information://activity_user_info.xml
+                    Log.e("[base]","btn_information");
                     intent = new Intent(mContext, FaceUserInfoActivity.class);
                     intent.putExtra("page_type", "user_info");
                     startActivity(intent);
-                    LogUtils.d("[base]","btn_information");
                     break;
                 case R.id.btn_download:
+                    Log.e("[base]","btn_download");
                     intent = new Intent(mContext, FileDownloadActivity.class);
                     intent.putExtra("page_type", "download");
                     startActivity(intent);
-                    LogUtils.d("[base]","btn_download");
                     break;
                 case R.id.btn_logout:
-                    LogUtils.d("[base]","btn_logout");
+                    Log.e("[base]","btn_logout");
                     PlatformUtils.getInstance().Logout();
                     startActivity(new Intent(mContext, FrontPageActivity.class));
                     break;

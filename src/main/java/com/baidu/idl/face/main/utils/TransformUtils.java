@@ -144,7 +144,7 @@ public class TransformUtils {
         score = FaceSDKManager.getInstance().getFaceFeature().featureCompare(
                 BDFaceSDKCommon.FeatureType.BDFACE_FEATURE_TYPE_ID_PHOTO,
                 firstFeature, secondFeature, true);
-        Log.e("TransformUtils", "Compare, score = " + score);
+        //Log.e("TransformUtils", "Compare, score = " + score);
         return score;
     }
 
@@ -152,6 +152,7 @@ public class TransformUtils {
     //活体检测
     public static float liveness(Bitmap bitmap)
     {
+        if (bitmap == null) return -1.0f;
         BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
         FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect().detect(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
         float rgbScore = FaceSDKManager.getInstance().getFaceLiveness().silentLive(BDFaceSDKCommon.LiveType.BDFACE_SILENT_LIVE_TYPE_RGB, rgbInstance, faceInfos[0].landmarks);
@@ -162,16 +163,12 @@ public class TransformUtils {
     //属性检测
     public static FaceInfo Bitmap2Msg(Bitmap bitmap)
     {
-        String msg = "";
         SingleBaseConfig.getBaseConfig().setAttribute(true);
         FaceSDKManager.getInstance().initConfig();
-        Log.e("TransformUtils","attr = "+ SingleBaseConfig.getBaseConfig().isAttribute());
 
         BDFaceImageInstance rgbInstance = new BDFaceImageInstance(bitmap);
         FaceInfo[] faceInfos = FaceSDKManager.getInstance().getFaceDetect().track(BDFaceSDKCommon.DetectType.DETECT_VIS, rgbInstance);
         if (faceInfos == null || faceInfos.length==0) return null;//"未检测到人脸";
-        msg = TransformUtils.Faceinfo2Msg(faceInfos[0]);
-        Log.e("TransformUtils","TTT, len = "+faceInfos.length+",msg = " + msg);
         return faceInfos[0];
     }
 
@@ -186,6 +183,7 @@ public class TransformUtils {
         }
         return null;
     }
+
     public static String Faceinfo2Msg(FaceInfo faceInfo){
         if (faceInfo == null ) return null;
         StringBuilder msg = new StringBuilder();
@@ -202,6 +200,28 @@ public class TransformUtils {
                 : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_WHITE ? "white"
                 : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_BLACK ? "black"
                 : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_INDIAN ? "indian" : "human");
+        return msg.toString();
+    }
+    public static String Faceinfo2Msg_cn(FaceInfo faceInfo) {
+        if (faceInfo == null ) return null;
+        StringBuilder msg = new StringBuilder();
+        if (faceInfo != null) {
+            msg.append(faceInfo.age);
+            msg.append(",").append(faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_NEUTRAL ?
+                    "中性表情"
+                    : faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_BIG_SMILE ? "大笑"
+                    : faceInfo.emotionThree == BDFaceSDKCommon.BDFaceEmotion.BDFACE_EMOTION_SMILE ? "微笑" : "没有表情");
+            msg.append(",").append(faceInfo.gender == BDFaceSDKCommon.BDFaceGender.BDFACE_GENDER_FEMALE ? "女性" :
+                    faceInfo.gender == BDFaceSDKCommon.BDFaceGender.BDFACE_GENDER_MALE ? "男性" : "婴儿");
+            msg.append(",").append(faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_NO_GLASSES ? "无眼镜"
+                    : faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_GLASSES ? "有眼镜"
+                    : faceInfo.glasses == BDFaceSDKCommon.BDFaceGlasses.BDFACE_SUN_GLASSES ? "墨镜" : "太阳镜");
+            msg.append(",").append(faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_YELLOW ? "黄种人"
+                    : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_WHITE ? "白种人"
+                    : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_BLACK ? "黑种人"
+                    : faceInfo.race == BDFaceSDKCommon.BDFaceRace.BDFACE_RACE_INDIAN ? "印度人"
+                    : "地球人");
+        }
         return msg.toString();
     }
     //人脸识别

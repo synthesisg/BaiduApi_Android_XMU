@@ -6,7 +6,7 @@
 
     <include
         android:id="@+id/layout_group_title"
-        layout="@layout/layout_title" />
+        layout="@layout/layout_title_right" />
 
     <LinearLayout
         android:id="@+id/relative_group_search"

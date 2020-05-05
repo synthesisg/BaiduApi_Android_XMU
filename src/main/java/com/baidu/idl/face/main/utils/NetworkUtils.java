@@ -14,7 +14,7 @@ import java.util.Map;
 public class NetworkUtils {
     private static String p_username="system";
     private static String p_password="FaceDetection";
-    public static String URL_h="http://192.168.1.8:8080/web/f/appApi/";
+    public static String URL_h="http://192.168.1.9:8080/web/f/appApi/";
     public static int WaitSec=5;
 
     public static Pair<Integer, String> testimpl()
@@ -148,7 +148,7 @@ public class NetworkUtils {
             input = urlConn.getInputStream();
             Log.e("PlatformUtils","[getInputStearmFormUrl] input = "+ (input!=null) +", len = " + urlConn.getContentLength()+", path = "  +path+File.separator+fileName );
 
-            if (input==null) return false;
+            if (input==null || urlConn.getContentLength() == 0) return false;
 
             boolean succ = FileUtils.write2SDFromInput(input, path+File.separator+fileName);
             Log.e("PlatformUtils","[downlaodFile] done, succ = " + succ );
@@ -167,22 +167,18 @@ public class NetworkUtils {
     }
 
     public static class DLThread extends Thread {
-        private FileDownloadActivity.dat item;
         public boolean done = false;
+        private String url,name;
 
-        public DLThread(FileDownloadActivity.dat _item) {
-            item = _item;
-            Log.e("DLThread","Create , url = " + item.url);
-        }
         public DLThread(String _name, String _url) {
-            item = new FileDownloadActivity.dat(_name,_url);
-            Log.e("DLThread","Create , url = " + item.url);
+            name = _name;
+            url = _url;
+            Log.e("DLThread","Create , url = " + url);
         }
 
         public void run() {
-            Log.e("DLThread","Begin , path = "+ FileUtils.getSDRootFile().getPath()+"/ademo" + ", url = " + item.url);
-            NetworkUtils.downlaodFile(item.url,FileUtils.getSDRootFile().getPath()+"/ademo",item.name);
-            done = true;
+            Log.e("DLThread","Begin , path = "+ FileUtils.getSDRootFile().getPath()+"/ademo" + ", url = " + url);
+            done = NetworkUtils.downlaodFile(url,FileUtils.getSDRootFile().getPath()+"/ademo",name);
             Log.e("DLThread","End .");
         }
     }

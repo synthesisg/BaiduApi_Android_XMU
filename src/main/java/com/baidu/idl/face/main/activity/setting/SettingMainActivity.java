@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.baidu.idl.face.main.activity.BaseActivity;
@@ -61,7 +62,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         TextView tvQualityControl = findViewById(R.id.tv_qualitycontrol);
         TextView tvMirror = findViewById(R.id.tv_mirror);
 
-        Button smBack = findViewById(R.id.sm_back);
+        ImageButton smBack = findViewById(R.id.sm_back);
 
         smFaceDetectAngle.setOnClickListener(this);
         smCameraDisplayAngle.setOnClickListener(this);

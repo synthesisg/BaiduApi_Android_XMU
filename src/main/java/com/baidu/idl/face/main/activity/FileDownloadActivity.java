@@ -28,6 +28,7 @@ import com.baidu.idl.facesdkdemo.R;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 import static java.lang.Thread.sleep;
@@ -64,6 +65,30 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
      * UI 相关VIEW 初始化
      */
     private void initView() throws InterruptedException {
+        Toast.makeText(this, "Connecting...", Toast.LENGTH_LONG).show();
+
+        Log.e("START","=========================");
+        Thread thread = new NetworkUtils.MSGThread("senddoc",null,"GET");
+        thread.start();
+        thread.join();
+        List<Pair<String,String>> fileLists = new ArrayList<>();
+        if(((NetworkUtils.MSGThread) thread).getCode()!=200)
+        {
+            Toast.makeText(this, "Connection fail.", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            Toast.makeText(this, "Connection success.", Toast.LENGTH_LONG).show();
+            Map<String, Object> map = JsonUtils.jsonToMap(((NetworkUtils.MSGThread) thread).getMessage());
+            Map<String, Object> arr = (Map<String, Object>) map.get("docdata");
+            for(Map.Entry<String, Object> entry : arr.entrySet()){
+                Map<String, Object> arr2 = (Map<String, Object>) entry.getValue();
+                Log.e("JSON-",arr2.get("docname") + "|||" +arr2.get("url"));
+                fileLists.add(new Pair<String, String> (arr2.get("docname").toString(),NetworkUtils.URL_h + arr2.get("url").toString()));
+            }
+        }
+
+
         btnBaseDownload = findViewById(R.id.btn_basedd);
         btnBaseUpload = findViewById(R.id.btn_baseud);
         btnBaseZip = findViewById(R.id.btn_basezip);
@@ -81,30 +106,10 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         recyclerView = findViewById(R.id.recycler_file_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);//线性布局
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new FileDownloadAdapter(fakeList());
+        adapter = new FileDownloadAdapter(fileLists);
         recyclerView.setAdapter(adapter);
         adapter.setItemClickListener(this);
         adapter.setItemLongClickListener(this);
-
-        //testimpl
-        //String txt=PlatformUtils.testimpl();
-        //Toast.makeText(this, txt, Toast.LENGTH_LONG).show();
-        NetworkUtils.MSGThread th= new NetworkUtils.MSGThread(null,null,null);
-        th.start();
-        int cnt=0;
-        while (th.getCode()==0&&cnt<NetworkUtils.WaitSec) {
-            sleep(1000);
-            cnt++;
-        }
-        if(th.getCode()==0)
-        {
-            Toast.makeText(this, "Connection failed.", Toast.LENGTH_LONG).show();
-        }
-        else
-        {
-            Toast.makeText(this, th.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        //Log.e("IMPL","Got");
     }
 
     /**
@@ -145,6 +150,9 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         }catch (Exception ex){}
     }
 
+
+
+    /*
     public static class dat
     {
         public String name,url;
@@ -155,8 +163,6 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
             url=_u;
         }
     }
-
-    //*
     public List<dat> fakeList()
     {
         List<dat> ret=new ArrayList<>();
@@ -167,6 +173,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         ret.add(new dat("title.jpg","http://software.xmu.edu.cn/View/Image/title.jpg"));
         return ret;
     }
+    //*/
 
     class FileDownloadViewHolder extends RecyclerView.ViewHolder{
         private TextView textFile,textUrl;
@@ -179,7 +186,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
 
     public class FileDownloadAdapter extends RecyclerView.Adapter<FileDownloadActivity.FileDownloadViewHolder> implements
             View.OnClickListener, View.OnLongClickListener {
-        private List<dat> mList;
+        private List<Pair<String,String> > mList;
         private OnItemClickListener mItemClickListener;
         private OnItemLongClickListener mItemLongClickListener;
 
@@ -192,7 +199,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
             mItemLongClickListener = itemLongClickListener;
         }
 
-        public FileDownloadAdapter(List<dat> _list)
+        public FileDownloadAdapter(List<Pair<String,String>> _list)
         {
             mList=_list;
         }
@@ -210,16 +217,16 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         @Override
         public void onBindViewHolder(final FileDownloadActivity.FileDownloadViewHolder holder, final int position) {
             holder.itemView.setTag(position);
-            dat item = mList.get(position);
-            holder.textFile.setText(item.name);
-            holder.textUrl.setText(item.url);
+            Pair<String,String> item = mList.get(position);
+            holder.textFile.setText(item.first);
+            holder.textUrl.setText(item.second);
         }
 
         @Override
         public int getItemCount() {
             return mList != null ? mList.size() : 0;
         }
-        public dat getDat(int pos) {return mList.get(pos);}
+        public Pair<String, String> getDat(int pos) {return mList.get(pos);}
 
         @Override
         public void onClick(View view) {
@@ -240,32 +247,22 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
 
     // 用于adapter的item点击事件
     @Override
-    public void onItemClick(View view, int position) {
+    public void onItemClick(View view, int position){
         Toast.makeText(this, "pos = "+position, Toast.LENGTH_SHORT).show();
-        NetworkUtils.DLThread th= new NetworkUtils.DLThread(adapter.getDat(position));
+        NetworkUtils.DLThread th= new NetworkUtils.DLThread(adapter.getDat(position).first,adapter.getDat(position).second);
         th.start();
-        Log.e("Download","Begin from "+adapter.getDat(position).url);
-        //boolean succ=PlatformUtils.downlaodFile(adapter.getDat(position).url,FileUtils.getSDRootFile().getPath()+"/ademo",adapter.getDat(position).name);
-        Toast.makeText(this, "FIN , result = " + true, Toast.LENGTH_SHORT).show();
-        // 如果是全选状态
-        /*
-        if (mButtonState == FaceUserGroupListActivity.ButtonState.ALL_SELECT) {
-            // 如果当前item未选中，则选中
-            if (!mListGroupInfo.get(position).isChecked()) {
-                mListGroupInfo.get(position).setChecked(true);
-                mSelectCount++;
-            } else {
-                // 如果当前item已经选中，则取消选中
-                mListGroupInfo.get(position).setChecked(false);
-                mSelectCount--;
-            }
-            mFaceUserGroupAdapter.notifyDataSetChanged();
-        } else {
-            Intent intent = new Intent(mContext, FaceUserListActivity.class);
-            intent.putExtra("group_id", mListGroupInfo.get(position).getGroupId());
-            startActivity(intent);
+        Log.e("Download","Begin from "+adapter.getDat(position).second);
+        try {
+            th.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Download ERROR. Throw "+ e, Toast.LENGTH_SHORT).show();
+            return;
         }
-        */
+        if (th.done)
+            Toast.makeText(this, "下载完成，请至文件夹内查看", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(this, "Download ERROR. Bad Request.", Toast.LENGTH_SHORT).show();
     }
 
     @Override

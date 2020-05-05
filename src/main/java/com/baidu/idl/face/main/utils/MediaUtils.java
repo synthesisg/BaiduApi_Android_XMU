@@ -2,6 +2,7 @@ package com.baidu.idl.face.main.utils;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 import android.util.Pair;
 import com.baidu.idl.main.facesdk.FaceInfo;
 
@@ -42,23 +43,28 @@ public class MediaUtils {
         List<Bitmap> bitmaps = getAllFrame();
         List<FaceInfo> faceinfos = new ArrayList<>();
         List<byte[]> bytes = new ArrayList<>();
+        List<String> bitmaps_base64 = new ArrayList<>();
         for(Bitmap item : bitmaps)
         {
             Pair<Boolean,byte[]> feature = TransformUtils.Bitmap2Feature(item);
             if(feature.first)
             {
+                Log.e("MediaUtils","Face detect.");
                 boolean com = true;
                 for(byte[] by : bytes)
                 {
-                    if(TransformUtils.Compare(feature.second,by)>80)
+                    if(TransformUtils.Compare(feature.second,by) > 80)
                     {
+                        Log.e("MediaUtils","Face repeat, discard.");
                         com = false;
                         break;
                     }
                 }
                 if(com) {
+                    Log.e("MediaUtils","Face add.");
                     bytes.add(feature.second);
                     faceinfos.add(TransformUtils.Bitmap2Faceinfo(item));
+                    bitmaps_base64.add(TransformUtils.Bitmap2Str(item));
                 }
             }
         }
@@ -69,6 +75,7 @@ public class MediaUtils {
 
         mmr = null ;
         //del file
-        return ret;
+        Log.e("MediaUtils","Found " + ret.size() +" different faces finally.");
+        return bitmaps_base64;
     }
 }

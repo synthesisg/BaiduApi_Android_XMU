@@ -9,12 +9,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.baidu.idl.face.main.listener.OnItemClickListener;
 import com.baidu.idl.face.main.listener.OnItemLongClickListener;
@@ -91,7 +86,7 @@ public class FaceUserGroupListActivity extends BaseActivity implements View.OnCl
         mBtnBatchOperation = findViewById(R.id.btn_setting);
         mBtnBatchOperation.setText("批量操作");
         mBtnBatchOperation.setOnClickListener(this);
-        Button btnBack = findViewById(R.id.btn_back);
+        ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(this);
 
         mEditGroupSearch = findViewById(R.id.edit_group_search);

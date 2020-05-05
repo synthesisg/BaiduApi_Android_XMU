@@ -17,11 +17,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.api.FaceApi;
@@ -84,8 +80,8 @@ public class FaceDepthRegisterActivity extends BaseOrbbecActivity implements Ope
     // textureView用于绘制人脸框等。
     private ImageView testImageView;
 
-    private Button backButton;
-    private Button setButton;
+    private ImageButton backButton;
+    private ImageButton setButton;
     // detect-info
     // 注册的 提示 view
     private TextView mTrackText;

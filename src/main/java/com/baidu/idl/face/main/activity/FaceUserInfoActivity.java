@@ -5,15 +5,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.BuildConfig;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.manager.UserInfoManager;
@@ -72,7 +72,7 @@ public class FaceUserInfoActivity extends BaseActivity implements View.OnClickLi
         textTitle.setText("用户信息");
         Button btnBatchOperation = findViewById(R.id.btn_setting);
         btnBatchOperation.setVisibility(View.GONE);
-        Button btnBack = findViewById(R.id.btn_back);
+        ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(this);
 
         mTextUserName = findViewById(R.id.text_user_name);
@@ -118,9 +118,11 @@ public class FaceUserInfoActivity extends BaseActivity implements View.OnClickLi
                 String userInfo = intent.getStringExtra("user_info");
                 if (TextUtils.isEmpty(userInfo)) {
                     mTextUserInfo.setVisibility(View.GONE);
+                    findViewById(R.id.aline).setVisibility(View.GONE);
                 } else {
                     mTextUserInfo.setVisibility(View.VISIBLE);
                     mTextUserInfo.setText("用户信息：" + userInfo);
+                    findViewById(R.id.aline).setVisibility(View.VISIBLE);
                 }
 
                 long ctime = intent.getLongExtra("ctime", 0);
@@ -194,10 +196,16 @@ public class FaceUserInfoActivity extends BaseActivity implements View.OnClickLi
      */
     private void takeCamera(int requestCode) {
         // 获取根路径
-        File root = Environment.getExternalStorageDirectory();
+        File root = FileUtils.getBatchImportSuccessDirectory();
         // 保存的图片文件
         mImageFile = new File(root, "test.jpg");
-        Uri uri = Uri.fromFile(mImageFile);
+        Uri uri;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            uri = FileProvider.getUriForFile(this, "com.baidu.idl.facesdkdemo.fileProvider", mImageFile);
+        }
+        else {
+            uri = Uri.fromFile(mImageFile);
+        }
         Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(intent, requestCode);

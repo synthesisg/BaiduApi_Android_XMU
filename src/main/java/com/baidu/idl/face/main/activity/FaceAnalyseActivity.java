@@ -9,10 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
@@ -65,8 +62,8 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
         Button btFirstPickFromPhoto = findViewById(R.id.bt_first_pick_from_photo);
         Button btFirstPickFromVideo = findViewById(R.id.bt_first_pick_from_video);
         Button btStartCompare = findViewById(R.id.bt_start_compare);
-        Button btSetting = findViewById(R.id.btn_setting);
-        Button backBtn = findViewById(R.id.btn_back);
+        ImageButton btSetting = findViewById(R.id.btn_setting);
+        ImageButton backBtn = findViewById(R.id.btn_back);
         imgFirst = findViewById(R.id.img_first);
         tvScore = findViewById(R.id.tv_score);
         tvState = findViewById(R.id.tv_state);
@@ -184,6 +181,7 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
             }
         }  else if (requestCode == PICK_VIDEO_FRIST && (data != null)) {
             String faceImagePath = data.getStringExtra("file_path");
+            msg = data.getStringExtra("info");
             Bitmap bitmap = BitmapFactory.decodeFile(faceImagePath);
             if (bitmap != null) {
                 imgFirst.setImageBitmap(bitmap);
@@ -209,9 +207,11 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
         // 检测结果判断
         if (faceInfos != null && faceInfos.length > 0) {
             //* 特征提取测试
-            TransformUtils.liveness(bitmap);//score
-            FaceInfo faceinfo = TransformUtils.Bitmap2Msg(bitmap);
-            msg = TransformUtils.Faceinfo2Msg(faceinfo);
+            if(isFromPhotoLibrary) {
+                TransformUtils.liveness(bitmap);//score
+                FaceInfo faceinfo = TransformUtils.Bitmap2Msg(bitmap);
+                msg = TransformUtils.Faceinfo2Msg_cn(faceinfo);
+            }
             Log.e("syncFeature","faceInfo = " + msg);
             //*/
             Log.e("syncFeature","faceInfos.length = " + faceInfos.length + " ,landmarks = " + faceInfos[0].landmarks.length);
@@ -277,7 +277,7 @@ public class FaceAnalyseActivity extends BaseActivity implements View.OnClickLis
         //*/
         try {
             Log.e("Feature", new String(firstFeature, "UTF-8"));
-            tvScore.setText("Feature：" + firstFeature.length);
+            tvScore.setText("特征抽取成功.");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

@@ -167,6 +167,17 @@ public class FileUtils {
         }
         return file;
     }
+    public static File getCacheDirectory() {
+        File sdRootFile = getBatchImportSuccessDirectory();
+        File file = null;
+        if (sdRootFile != null && sdRootFile.exists()) {
+            file = new File(sdRootFile, "cache");
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        }
+        return file;
+    }
 
     /**
      * 判断文件是否存在

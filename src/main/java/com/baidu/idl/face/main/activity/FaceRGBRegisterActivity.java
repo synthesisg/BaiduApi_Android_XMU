@@ -51,8 +51,8 @@ import static com.baidu.idl.face.main.activity.FaceMainSearchActivity.PAGE_TYPE;
 
 public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClickListener {
 
-    private Button backButton;
-    private Button setButton;
+    private ImageButton backButton;
+    private ImageButton setButton;
     private AutoTexturePreviewView mPreviewView;
     private ImageView testImageview;
 
@@ -259,6 +259,7 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
 
     // 检测结果输出
     private void checkResult(LivenessModel model) {
+        if ("done".equals(getIntent().getStringExtra("page_type"))) return;
         if (model == null) {
             clearTip();
             return;
@@ -359,8 +360,10 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
         if (model == null) {
             return;
         }
-
-        if (username == null || groupId == null) {
+        String extra=getIntent().getStringExtra("page_type");
+        if (extra == null) extra = "";
+        if ("done".equals(extra)) return;
+        if ((username == null || groupId == null)&&"update_face".equals(extra)==false) {
             displayTip("注册信息缺失");
             return;
         }
@@ -402,12 +405,12 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
 
         Log.e("cdx", "beginRegister,ret=" + ret);
         // 特征提取成功
-        if (ret == 128) {
 
-            String imageName = groupId + "-" + username + ".jpg";
+        if (ret == 128) {
             //注册部分
             if("update_face".equals(getIntent().getStringExtra("page_type"))==false) {
                 // 注册到人脸库
+                String imageName = groupId + "-" + username + ".jpg";
                 boolean isSuccess = FaceApi.getInstance().registerUserIntoDBmanager(groupId, username, imageName,
                         userInfo, faceFeature);
                 if (isSuccess) {
@@ -464,19 +467,49 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
             } else {
                 //修改部分
                 User update_user= PlatformUtils.getInstance().getUser();
+                String imageName = update_user.getGroupId() + "-" + update_user.getUserName()+".jpg";
+
+                Log.e("Update",imageName+"|||"+update_user.getImageName());
+
                 update_user.setFeature(faceFeature);
+                update_user.setUpdateTime(System.currentTimeMillis());
+                update_user.setImageName(imageName);
                 FaceApi.getInstance().userUpdate(update_user);
 
                 File faceDir = FileUtils.getBatchImportSuccessDirectory();
                 File file = new File(faceDir, imageName);
                 ImageUtils.resize(rgbBitmap, file, 300, 300);
 
-            //连接两数据库==========================================================上传服务器===========================================
+                Log.e("qing", "修改成功 - database");
+
+                /*
+                * 连接两数据库==========================================================上传服务器===========================================
+                * */
+
                 PlatformUtils.getInstance().setUser(update_user);
                 FaceApi.getInstance().initDatabases(true);
-                Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
-                Log.e("FaceUpdate", "UpdateFace");
-                startActivity(new Intent(FaceRGBRegisterActivity.this, WelcomeActivity.class));
+                Log.e("FaceUpdate", "UpdateFace Fin.");
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackText.setVisibility(View.VISIBLE);
+                        mTrackText.setText("修改完毕");
+                        mTrackText.setBackgroundColor(Color.rgb(66, 147, 136));
+                        mDetectText.setText("用户" + PlatformUtils.getInstance().getUser().getUserName() + "," + "已经修改完毕");
+                        mDetectImage.setImageBitmap(rgbBitmap);
+
+                        // 防止重复修改
+                        getIntent().putExtra("page_type","done");
+                        // 做延时 finish
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                FaceRGBRegisterActivity.this.finish();
+                            }
+                        }, 1000);
+
+                    }
+                });
             }
 
         } else if (ret == -1) {
@@ -498,11 +531,10 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
     // 人脸大小顾虑
     public boolean faceSizeFilter(FaceInfo faceInfo, int bitMapWidth, int bitMapHeight) {
 
-        // 判断人脸大小，若人脸超过屏幕二分一，则提示文案“人脸离手机太近，请调整与手机的距离”；
-        // 若人脸小于屏幕三分一，则提示“人脸离手机太远，请调整与手机的距离”
+        //if ("done".equals(getIntent().getStringExtra("page_type"))) return true;
+
         float ratio = (float) faceInfo.width / (float) bitMapHeight;
         if (ratio > 0.6) {
-
             displayTip("人脸离屏幕太近，请调整与屏幕的距离");
             return false;
         } else if (ratio < 0.2) {
@@ -522,7 +554,6 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
             displayTip("人脸在屏幕中太靠上");
             return false;
         }
-
         return true;
     }
 }

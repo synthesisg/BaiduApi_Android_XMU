@@ -8,10 +8,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
@@ -68,8 +65,8 @@ public class FaceIdCompareActivity extends BaseActivity implements View.OnClickL
         Button btSecondPickFromPhoto = findViewById(R.id.bt_second_pick_from_photo);
         Button btSecondPickFromVideo = findViewById(R.id.bt_second_pick_from_video);
         Button btStartCompare = findViewById(R.id.bt_start_compare);
-        Button btSetting = findViewById(R.id.btn_setting);
-        Button backBtn = findViewById(R.id.btn_back);
+        ImageButton btSetting = findViewById(R.id.btn_setting);
+        ImageButton backBtn = findViewById(R.id.btn_back);
         imgFirst = findViewById(R.id.img_first);
         imgSecond = findViewById(R.id.img_second);
         tvScore = findViewById(R.id.tv_score);

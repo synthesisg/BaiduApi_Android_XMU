@@ -4,10 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.listener.OnImportListener;
@@ -60,7 +57,7 @@ public class BatchImportActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void initView() {
-        Button buttonBack = findViewById(R.id.button_import_back);
+        ImageButton buttonBack = findViewById(R.id.button_import_back);
         buttonBack.setOnClickListener(this);
         mButtonImport = findViewById(R.id.button_import);
         mButtonImport.setOnClickListener(this);

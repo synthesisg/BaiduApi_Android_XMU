@@ -24,11 +24,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.baidu.idl.face.main.camera.CameraPreviewManager;
 import com.baidu.idl.face.main.model.GlobalSet;
@@ -86,8 +82,8 @@ public class FaceRGBDepthCloseDebugSearchActivity extends BaseOrbbecActivity imp
 
     private Context mContext;
 
-    private Button mButReturn;
-    private Button mBtSetting;
+    private ImageButton mButReturn;
+    private ImageButton mBtSetting;
 
     // 关闭Debug 模式
     private AutoTexturePreviewView mAutoCameraPreviewView;

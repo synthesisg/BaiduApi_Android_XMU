@@ -8,20 +8,20 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp">
+        android:layout_height="70dp"
+        android:background="#66CCEE">
 
-        <Button
+    <ImageButton
             android:id="@+id/id_reg_ir_back"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_margin="5dp"
-            android:background="@drawable/fillet_style_return_selector"
-            android:text="返回"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:scaleType="fitXY"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/transparent"
+            android:src="@mipmap/back"/>
 
-        <TextView
+    <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,19 +29,20 @@
             android:layout_centerVertical="true"
             android:text="注册"
             android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:textStyle="bold"
+            android:textSize="28sp" />
 
-        <Button
+    <ImageButton
             android:id="@+id/id_reg_ir_setting"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="40dp"
+            android:scaleType="fitXY"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_margin="5dp"
-            android:background="#FF009688"
-            android:text="设置"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:layout_marginEnd="14dp"
+            android:background="@android:color/transparent"
+            android:src="@mipmap/setting_icon"/>
 
         <View
             android:layout_width="match_parent"
@@ -57,7 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="70dp"
         android:layout_marginBottom="220dp">
 
         // RGB预览

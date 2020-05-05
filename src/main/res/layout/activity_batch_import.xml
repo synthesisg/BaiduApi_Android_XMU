@@ -7,18 +7,18 @@
     <RelativeLayout
         android:id="@+id/relative_title"
         android:layout_width="match_parent"
-        android:layout_height="60dp">
+        android:layout_height="70dp"
+        android:background="#66CCEE">
 
-        <Button
+        <ImageButton
             android:id="@+id/button_import_back"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_margin="5dp"
-            android:background="@drawable/fillet_style_return_selector"
-            android:text="返回"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:scaleType="fitXY"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/transparent"
+            android:src="@mipmap/back"/>
 
         <TextView
             android:id="@+id/text_title"
@@ -28,7 +28,8 @@
             android:layout_centerVertical="true"
             android:text="批量导入"
             android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:textSize="28sp"
+            android:textStyle="bold"/>
 
         <View
             android:layout_width="match_parent"
@@ -181,24 +182,22 @@
 
     <Button
         android:id="@+id/button_import"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="70dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/imageView2"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
         android:background="@drawable/fillet_style_button_selector"
         android:text="搜索SD卡，并导入数据"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:textColor="#fff"
         android:textSize="16sp" />
 
-    <ImageView
+    <!--ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="39dp"
         android:src="@mipmap/ic_baidu_logo"
-        android:id="@+id/imageView2" />
+        android:id="@+id/imageView2" /-->
 </RelativeLayout>

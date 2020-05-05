@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.GlobalSet;
 import com.baidu.idl.face.main.utils.ImageUtils;
 import com.baidu.idl.face.main.camera.CameraPreviewManager;
@@ -29,6 +30,7 @@ import com.baidu.idl.face.main.manager.FaceTrackManager;
 import com.baidu.idl.face.main.callback.FaceDetectCallBack;
 import com.baidu.idl.face.main.model.LivenessModel;
 import com.baidu.idl.face.main.utils.FileUtils;
+import com.baidu.idl.face.main.utils.TransformUtils;
 import com.baidu.idl.face.main.view.FaceRoundView;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
@@ -121,6 +123,8 @@ public class FaceRGBDetectActivity extends BaseActivity {
         }
 
 
+        SingleBaseConfig.getBaseConfig().setAttribute(true);
+        FaceSDKManager.getInstance().initConfig();
     }
 
 
@@ -243,7 +247,7 @@ public class FaceRGBDetectActivity extends BaseActivity {
             case 1: {
                 displayResult(model, null);
                 // 采集，保存图片
-                saveFaceAndFinish(model.getBdFaceImageInstance());
+                saveFaceAndFinish(model.getBdFaceImageInstance(), TransformUtils.Faceinfo2Msg_cn(model.getFaceInfo()));
             }
                 break;
             case 2: { // RGB活体检测
@@ -254,7 +258,7 @@ public class FaceRGBDetectActivity extends BaseActivity {
                 livenessSuccess = (model.getRgbLivenessScore() > rgbLiveThreshold) ? true : false;
                 if (livenessSuccess) {
                     // 采集图片，需要返回
-                    saveFaceAndFinish(model.getBdFaceImageInstance());
+                    saveFaceAndFinish(model.getBdFaceImageInstance(), TransformUtils.Faceinfo2Msg_cn(model.getFaceInfo()));
 
                 } else {
                     Toast.makeText(this, "活体验证失败", Toast.LENGTH_SHORT).show();
@@ -320,21 +324,24 @@ public class FaceRGBDetectActivity extends BaseActivity {
      *
      * @param instance
      */
-    private void saveFaceAndFinish(BDFaceImageInstance instance) {
+    private void saveFaceAndFinish(BDFaceImageInstance instance, String faceMsg) {
 
         final Bitmap bitmap = BitmapUtils.getInstaceBmp(instance);
         if (source == FaceIdCompareActivity.SOURCE_DETECT) {
             // 注册来源保存到注册人脸目录
-            File faceDir = FileUtils.getBatchImportSuccessDirectory();
+            File faceDir = FileUtils.getCacheDirectory();
             if (faceDir == null) {
                 Toast.makeText(this, "注册人脸目录未找到", Toast.LENGTH_SHORT).show();
             } else {
-                String imageName = UUID.randomUUID().toString();
+                String imageName = UUID.randomUUID().toString()+".jpg";
                 File file = new File(faceDir, imageName);
+
                 // 压缩、保存人脸图片至300 * 300，减少网络传输时间
                 ImageUtils.resize(bitmap, file, imageSize, imageSize);
+
                 Intent intent = new Intent();
                 intent.putExtra("file_path", file.getAbsolutePath());
+                intent.putExtra("info",faceMsg);
                 setResult(Activity.RESULT_OK, intent);
                 finish();
             }

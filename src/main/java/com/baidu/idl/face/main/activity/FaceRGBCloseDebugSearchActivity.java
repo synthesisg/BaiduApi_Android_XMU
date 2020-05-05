@@ -15,10 +15,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.face.main.camera.CameraPreviewManager;
@@ -110,10 +107,10 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
         mFaceDetectImageView.setKeepScreenOn(true);
 
         // 返回
-        Button mButReturn = findViewById(R.id.btn_back);
+        ImageButton mButReturn = findViewById(R.id.btn_back);
         mButReturn.setOnClickListener(this);
         // 设置
-        Button mBtSetting = findViewById(R.id.btn_setting);
+        ImageButton mBtSetting = findViewById(R.id.btn_setting);
         mBtSetting.setOnClickListener(this);
 
         // 单目摄像头RGB 图像预览
@@ -148,7 +145,6 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
                                     @Override
                                     public void onFaceDetectCallback(LivenessModel livenessModel) {
                                         // 输出结果
-                                        Log.e("Face","FaceDetect");
                                         checkCloseResult(livenessModel);
                                     }
 
@@ -259,7 +255,6 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
                 }
             }
         });
-        Log.e("Face","ThreadDone.");
         if(getIntent().getStringExtra("page_type")!=null && "detect".equals(getIntent().getStringExtra("page_type")))
         {
             getIntent().putExtra("page_type","LoginDone.");

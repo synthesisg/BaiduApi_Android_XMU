@@ -79,10 +79,10 @@ public class Base2Activity extends BaseActivity implements View.OnClickListener 
         mDrawDetectFaceView.setKeepScreenOn(true);
 
         // 返回
-        Button mButReturn = findViewById(R.id.btn_back);
+        ImageButton mButReturn = findViewById(R.id.btn_back);
         mButReturn.setOnClickListener(this);
         // 设置
-        Button mBtSetting = findViewById(R.id.btn_setting);
+        ImageButton mBtSetting = findViewById(R.id.btn_setting);
         mBtSetting.setOnClickListener(this);
 
         mDetectText = findViewById(R.id.detect_text);
