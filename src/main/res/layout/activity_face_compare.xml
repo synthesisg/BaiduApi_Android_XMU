@@ -22,15 +22,15 @@
                 android:src="@mipmap/back"/>
 
         <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:text="人证对比演示"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:textSize="28sp" />
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="人脸比对"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="28sp"/>
 
         <ImageButton
                 android:id="@+id/btn_setting"

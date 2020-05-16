@@ -100,6 +100,7 @@
         <activity android:name="com.baidu.idl.face.main.activity.Base2Activity"/>
         <activity android:name="com.baidu.idl.face.main.activity.BaseFileActivity"/>
         <activity android:name="com.baidu.idl.face.main.activity.WelcomeActivity"/>
+        <activity android:name="com.baidu.idl.face.main.activity.WelcomeAdminActivity"/>
         <activity android:name="com.baidu.idl.face.main.activity.FileDownloadActivity"/>
         <activity android:name="com.baidu.idl.face.main.activity.FaceAnalyseActivity"/>
 

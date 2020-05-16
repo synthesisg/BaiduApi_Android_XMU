@@ -39,7 +39,7 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
     private Context mContext;
 
 
-    private Button btnBaseDownload, btnBaseUpload,btnBaseZip,btnBaseUnzip;
+    private Button btnBaseZip, btnBaseUnzip;
     private RecyclerView recyclerView;
     private FileDownloadAdapter adapter;
     @Override
@@ -89,16 +89,12 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
         }
 
 
-        btnBaseDownload = findViewById(R.id.btn_basedd);
-        btnBaseUpload = findViewById(R.id.btn_baseud);
         btnBaseZip = findViewById(R.id.btn_basezip);
         btnBaseUnzip = findViewById(R.id.btn_baseunzip);
 
         TextView versionTv = findViewById(R.id.tv_version);
         versionTv.setText(String.format(" V %s", Utils.getVersionName(mContext)));
 
-        btnBaseDownload.setOnClickListener(this);
-        btnBaseUpload.setOnClickListener(this);
         btnBaseZip.setOnClickListener(this);
         btnBaseUnzip.setOnClickListener(this);
 
@@ -123,13 +119,6 @@ public class FileDownloadActivity extends BaseActivity implements View.OnClickLi
             //LogUtils.d("[click]","CLICK"+view.getId());
             String path="";
             switch (view.getId()) {
-
-                case R.id.btn_basedd:
-                    LogUtils.d("[base]","Download");
-                    break;
-                case R.id.btn_baseud:
-                    LogUtils.d("[base]","Upload");
-                    break;
                 case R.id.btn_basezip:
                     LogUtils.d("[base]","Zip");
                     path=FileUtils.getSDRootFile().getPath()+"/ademo";

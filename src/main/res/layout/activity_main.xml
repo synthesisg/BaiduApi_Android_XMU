@@ -23,7 +23,7 @@
         android:layout_below="@+id/tv_version"
         android:layout_marginTop="30dp"
         android:gravity="center_horizontal"
-        android:text="百度人脸离线识别SDK"
+        android:text="百度人脸识别SDK"
         android:textColor="@color/black"
         android:textSize="30sp" />
 
@@ -106,13 +106,6 @@
         android:textColor="@color/white"
         android:textSize="20sp" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="39dp"
-        android:src="@mipmap/ic_baidu_logo" />
     <Button
             android:text="FrontPage"
             android:layout_width="180dp"

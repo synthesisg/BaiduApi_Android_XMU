@@ -259,7 +259,10 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity implements Vie
         {
             getIntent().putExtra("page_type","LoginDone.");
             PlatformUtils.getInstance().Login(detectUser);
-            startActivity(new Intent(mContext, WelcomeActivity.class));
+            if ("DBA".equals(detectUser.getGroupId()))
+                startActivity(new Intent(mContext, WelcomeAdminActivity.class));
+            else
+                startActivity(new Intent(mContext, WelcomeActivity.class));
             finish();
         }
     }

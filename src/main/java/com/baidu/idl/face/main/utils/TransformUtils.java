@@ -1,7 +1,5 @@
 package com.baidu.idl.face.main.utils;
 
-import android.graphics.Matrix;
-import android.media.FaceDetector;
 import android.util.Base64;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,9 +7,6 @@ import android.graphics.BitmapFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import android.util.Log;
 import android.util.Pair;
@@ -28,9 +23,6 @@ import com.baidu.idl.main.facesdk.model.BDFaceOcclusion;
 import com.baidu.idl.main.facesdk.model.BDFaceSDKCommon;
 import com.baidu.idl.face.main.utils.ImageUtils;
 import com.baidu.idl.main.facesdk.utils.PreferencesUtil;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class TransformUtils {
 
@@ -66,6 +58,7 @@ public class TransformUtils {
             baos.flush();
             baos.close();
             byte[] bitmapBytes = baos.toByteArray();
+            Log.e("TransformUtils","[Bitmap2Byte] Done. length = " + bitmapBytes.length);
             return bitmapBytes;
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,6 +68,7 @@ public class TransformUtils {
     public static String Bitmap2Str(Bitmap bitmap) {
         String result = null;
         result = Base64.encodeToString(Bitmap2Byte(bitmap), Base64.DEFAULT);
+        Log.e("TransformUtils","[Bitmap2Str] Done. length = " + result.length());
         return result;
     }
 
@@ -93,7 +87,7 @@ public class TransformUtils {
 
         int len = width * height;
         byte[] yuv = new byte[len * 3 / 2];
-        Log.e("TransformUtils","[BitmaptoYUV] w = " + width + ",h = " + height + ",size = " + yuv.length);
+        Log.e("TransformUtils","[BitmaptoYUV] w = " + width + ",h = " + height + ", YUV_size = " + yuv.length);
         int y, u, v;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -105,22 +99,12 @@ public class TransformUtils {
                 y = ((66 * r + 129 * g + 25 * b + 128) >> 8) + 16;
                 u = ((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128;
                 v = ((112 * r - 94 * g - 18 * b + 128) >> 8) + 128;
-                // rgb2yuv
-                // y = (int) (0.299 * r + 0.587 * g + 0.114 * b);
-                // u = (int) (-0.147 * r - 0.289 * g + 0.437 * b);
-                // v = (int) (0.615 * r - 0.515 * g - 0.1 * b);
-                // RGB转换YCbCr
-                // y = (int) (0.299 * r + 0.587 * g + 0.114 * b);
-                // u = (int) (-0.1687 * r - 0.3313 * g + 0.5 * b + 128);
-                // if (u > 255)
-                // u = 255;
-                // v = (int) (0.5 * r - 0.4187 * g - 0.0813 * b + 128);
-                // if (v > 255)
-                // v = 255;
+
                 // 调整
                 y = y < 16 ? 16 : (y > 255 ? 255 : y);
                 u = u < 0 ? 0 : (u > 255 ? 255 : u);
                 v = v < 0 ? 0 : (v > 255 ? 255 : v);
+
                 // 赋值
                 yuv[i * width + j] = (byte) y;
                 yuv[len + (i >> 1) * width + (j & ~1) + 0] = (byte) u;

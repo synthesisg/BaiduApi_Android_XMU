@@ -85,12 +85,41 @@
         android:text="文档下载"
         android:textColor="@color/white"
         android:textSize="20sp" />
+    <Button
+            android:id="@+id/btn_h_management"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_download"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/fillet_style_button_selector"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="人脸库管理"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+    <Button
+            android:id="@+id/btn_h_import"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_h_management"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/fillet_style_button_selector"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="批量导入"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
     <Button
             android:id="@+id/btn_logout"
             android:layout_width="180dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/btn_download"
+            android:layout_below="@+id/btn_h_import"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="0dp"
             android:layout_marginTop="30dp"

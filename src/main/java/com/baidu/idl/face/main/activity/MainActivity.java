@@ -125,7 +125,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         //testjson
         /*
-        Map<String, Object> map = jsonToMap(strjs);
+        Map<String, Object> map = JsonUtils.jsonToMap(strjs);
         //这里最好写一个循环输出map的方法 ，我这是偷懒的写法
         for(Map.Entry<String, Object> entry : map.entrySet()){
             Log.e("JSON",entry.getKey() + "|||" +entry.getValue());
@@ -453,12 +453,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
 
                         Log.e("Video","Begin DL.");
-                        Thread thread = new NetworkUtils.DLThread("666.mp4",NetworkUtils.URL_h + uri);
+                        Thread thread = new NetworkUtils.DLThread("cache.mp4",NetworkUtils.URL_h + uri);
                         thread.start();
                         thread.join();
-                        Log.e("Video","End DL.Begin Extract at" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+                        Log.e("Video","End DL. Begin Extract at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
-                        MediaUtils media = new MediaUtils(FileUtils.getSDRootFile().getPath()+"/ademo/" + "666.mp4");
+                        MediaUtils media = new MediaUtils(FileUtils.getSDRootFile().getPath()+"/ademo/" + "cache.mp4");
                         List<String> lists = media.autoRun();
                         Log.e("Video","End Extract at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 

@@ -13,6 +13,7 @@ import android.widget.*;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
+import com.baidu.idl.face.main.utils.TransformUtils;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.FaceInfo;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
@@ -196,6 +197,7 @@ public class FaceIdCompareActivity extends BaseActivity implements View.OnClickL
             try {
                 final Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri1));
                 if (bitmap != null) {
+                    //TransformUtils.BitmaptoYUV(bitmap);
                     imgFirst.setImageBitmap(bitmap);
                     // 提取特征值
                     syncFeature(bitmap, firstFeature, 1, true);
