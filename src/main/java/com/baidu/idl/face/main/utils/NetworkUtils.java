@@ -14,7 +14,7 @@ import java.util.Map;
 public class NetworkUtils {
     private static String p_username="system";
     private static String p_password="FaceDetection";
-    public static String URL_h="http://192.168.1.9:8080/web/f/appApi/";
+    public static String URL_h="http://120.26.177.246:8080/web/f/appApi/";
     public static int WaitSec=5;
 
     public static Pair<Integer, String> testimpl()

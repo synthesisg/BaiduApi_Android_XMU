@@ -27,6 +27,7 @@ import com.baidu.idl.main.facesdk.statistic.NetWorkUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -268,9 +269,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             Map<String, Object> arr = (Map<String, Object>) map.get("picturegroup");
                             for(Map.Entry<String, Object> entry : arr.entrySet()){
                                 Map<String, Object> arr2 = (Map<String, Object>) entry.getValue();
-                                for(Map.Entry<String, Object> entry2 : arr2.entrySet()){
-                                    Log.e("JSON--Inner",entry2.getKey());
-                                    Bitmap bitmap_n = TransformUtils.StrToBitmap(entry2.getValue().toString());
+                                    Log.e("JSON--Inner",arr2.get("facepictureid")+"|||" + arr2.get("data"));
+                                    Bitmap bitmap_n = TransformUtils.StrToBitmap(arr2.get("data").toString());
                                     Pair<Boolean,byte[]> ret_n = TransformUtils.Bitmap2Feature(bitmap_n);
                                     if(ret_n.first)
                                     {
@@ -278,13 +278,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                                         if (score > SingleBaseConfig.getBaseConfig().getThreshold())
                                         {
                                             ret_msg.put("result","success");
-                                            ret_msg.put("resultpictureid" , entry2.getKey());
+                                            ret_msg.put("resultpictureid" , arr2.get("facepictureid").toString());
                                             allJson.put("result","success");
-                                            allJson.put("resultpictureid" , entry2.getKey());
+                                            allJson.put("resultpictureid" , arr2.get("facepictureid").toString());
                                             break;
                                         }
                                     }
-                                }
                             }
                         }
                         break;}
@@ -325,6 +324,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             ret_msg.put("context", "living");
                             allJson.put("context", "living");
                         }
+                        allJson.put("result","success");
                         break;}
 
                     //人脸属性测试 人脸添加修改
@@ -334,7 +334,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
                         JSONObject info = new JSONObject();
                         switch (operateType)
-                        {
+                         {
                             case "facecharactercheck":
                                 url = "send/facecharactercheck";
                                 ret_msg.put("operatetype" , "facecharactercheck");
@@ -438,6 +438,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             newUser.setImageName(path);
                             FaceApi.getInstance().userAdd(newUser);
                             //保存图片 更新
+                            File faceDir = FileUtils.getBatchImportSuccessDirectory();
+                            File file = new File(faceDir, path);
+                            ImageUtils.resize(bitmap, file, 300, 300);
+                            // 数据变化，更新内存
+                            FaceApi.getInstance().initDatabases(true);
                         }
                         //*/
 

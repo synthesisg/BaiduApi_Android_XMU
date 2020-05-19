@@ -13,7 +13,7 @@ import java.net.Socket;
 
 public class SocketUtils extends Thread {
 
-    private String HOST = "192.168.1.9";
+    private String HOST = "120.26.177.246";
     private int PORT = 8081;
     private Socket socket = null;
     private Handler handler;

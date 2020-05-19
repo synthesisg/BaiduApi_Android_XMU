@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ReplacementTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -100,6 +101,7 @@ public class FaceAuthActicity extends BaseActivity implements View.OnClickListen
             case R.id.bt_inspect_sdcard:
                 String path = FileUitls.getSDPath();
                 String sdCardDir = path + "/" + "License.zip";
+                Log.e("6666666",sdCardDir);
                 if (FileUitls.fileIsExists(sdCardDir)) {
                     toast("读取到License.zip文件，文件地址为：" + sdCardDir, this);
                 } else {

@@ -165,7 +165,10 @@ public class FaceRegisterActivity extends BaseActivity implements View.OnClickLi
                 PlatformUtils.getInstance().setUser(update_user);
                 PlatformUtils.getInstance().updateUser(update_user);
                 Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(mContext, WelcomeActivity.class));
+                if ("DBA".equals(update_user.getGroupId()))
+                    startActivity(new Intent(mContext, WelcomeAdminActivity.class));
+                else
+                    startActivity(new Intent(mContext, WelcomeActivity.class));
                 finish();
             }
             //==================================================人脸注册================================================================

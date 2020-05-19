@@ -124,6 +124,11 @@ public class FaceRGBRegisterActivity extends BaseActivity implements View.OnClic
                 (int) (w * GlobalSet.SURFACE_RATIO), (int) (h * GlobalSet.SURFACE_RATIO),
                 Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         mPreviewView.setLayoutParams(cameraFL);
+
+        if ("update_face".equals(getIntent().getStringExtra("page_type"))) {
+            TextView tv = findViewById(R.id.tv_title);
+            tv.setText("人脸更新");
+        }
     }
 
 
